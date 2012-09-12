@@ -1,18 +1,15 @@
-body {
-  color: #FFF;
-}
-
-.color_popover {
+.color_editor {
   width: 232px;
+  padding: 16px;
 }
-.color_popover .header {
+.color_editor header {
   width: 100%;
   overflow: auto;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
 }
-.color_popover .large_swatches {
+.color_editor header .large_swatches {
   border-radius: 3px;
-  background-image: -webkit-image-set(url("../img/color_thumb_back.png") 1 x, url("../img/color_thumb_back@2x.png") 2 x);
+  background-image: url("../img/color_thumb_back.png");
   background-size: 8px;
   height: auto;
   width: auto;
@@ -21,70 +18,48 @@ floatleft
   overflow: auto;
   box-shadow: 0 1px 0 #fff;
 }
-.color_popover .large_swatch {
+.color_editor header .large_swatch {
   width: 44px;
   height: 35px;
   display: block;
   float: left;
   box-shadow: inset 0 1px 0 rgba(0,0,0,0.2);
 }
-.color_popover .current_color {
+.color_editor header .current_color {
   border-radius: 3px 0px 0px 3px;
   background-color: rgba(0,187,255,0.8);
 }
-.color_popover .last_color {
+.color_editor header .last_color {
   border-radius: 0px 3px 3px 0px;
   background-color: #ccc;
 }
-.color_popover .small_swatches {
-  width: 135px;
-  float: left;
+.color_editor .sliders {
+  position: relative;
+  clear: both;
 }
-.color_popover .small_swatch {
-  background-image: -webkit-image-set(url("../img/color_thumb_back.png") 1 x, url("../img/color_thumb_back@2x.png") 2 x);
-  width: 15px;
-  height: 15px;
-  margin-bottom: 5px;
-  margin-right: 5px;
-  float: left;
-  border-radius: 3px;
-  box-shadow: 0 1px 0 #fff;
-}
-.color_popover .small_swatch:last-child {
-  margin-right: 0px;
-}
-.color_popover .color_swatch {
-  box-shadow: inset 0 1px 0 rgba(0,0,0,0.2);
-  background-color: #d9dcdc;
-  height: 100%;
-  width: 100%;
-  margin-top: 0px;
-  margin-left: 0px;
-  border-radius: 3px;
-}
-.color_popover .gradient_overlay {
+.color_editor .gradient_overlay {
   position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 3px;
 }
-.color_popover .color_selection_field {
+.color_editor .color_selection_field {
   width: 181px;
   height: 156px;
   margin-right: 13px;
   display: block;
-  float: left;
   border-radius: 5px 3px 3px 3px;
   position: relative;
   box-shadow: 0 1px 0 #fff, inset 0 1px 0 rgba(0,0,0,0.2);
+  float: left;
 }
-.color_popover .color_selection_field .saturation_gradient {
+.color_editor .color_selection_field .saturation_gradient {
   background-image: -webkit-gradient(linear, 0% 50%, 100% 50%, from(#fff), to(rgba(255,255,255,0)));
 }
-.color_popover .color_selection_field .luminosity_gradient {
+.color_editor .color_selection_field .luminosity_gradient {
   background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from(transparent), to(#000));
 }
-.color_popover .color_selection_field .selector_base {
+.color_editor .color_selection_field .selector_base {
   width: 12px;
   height: 12px;
   background-color: #fff;
@@ -92,60 +67,106 @@ floatleft
   margin-bottom: -8px;
   margin-left: -5px;
 }
-.color_popover .color_selection_field .selector {
+.color_editor .color_selection_field .selector {
   width: 19px;
   height: 19px;
   position: absolute;
   left: -4px;
   top: -4px;
-  background-image: -webkit-image-set(url("../img/grabber_color-well.png") 1 x, url("../img/grabber_color-well@2x.png") 2 x);
+  background-image: url("../img/grabber_color-well.png");
 }
-.color_popover .slider {
+.color_editor .slider {
   border-radius: 3px;
   width: 12px;
   height: 156px;
   margin-right: 13px;
   background-color: #ccc;
   display: block;
-  float: left;
   box-shadow: 0 1px 0 #fff, inset 0 1px 0 rgba(0,0,0,0.2);
+  float: left;
+  position: relative;
 }
-.color_popover .slider positionrelative,
-.color_popover .slider .selector_base {
+.color_editor .slider .selector_base {
   width: 14px;
   height: 6px;
   background-color: transparent;
   position: absolute;
   margin: -1px -6px -4px -1px;
 }
-.color_popover .slider .selector {
+.color_editor .slider .selector {
   width: 20px;
   height: 12px;
   left: -3px;
   top: -3px;
   position: absolute;
-  background-image: -webkit-image-set(url("../img/grabber_color-slider.png") 1 x, url("../img/grabber_color-slider@2x.png") 2 x);
+  background-image: url("../img/grabber_color-slider.png");
 }
-.color_popover .slider.opacity_slider {
-  background-image: -webkit-image-set(url("../img/color_thumb_back.png") 1 x, url("../img/color_thumb_back@2x.png") 2 x);
+.color_editor .slider.opacity_slider {
+  background-image: url("../img/color_thumb_back.png");
   background-size: 8px;
-  position: relative;
   margin-right: 0px;
 }
-.color_popover .hue_slider {
+.color_editor .hue_slider {
   background-image: -webkit-linear-gradient(top, #f00, #f0f, #00f, #0ff, #0f0, #ff0, #f00);
 }
-.color_popover .color_value {
+.color_editor footer {
+  font-size: 100%;
+  clear: both;
+  vertical-align: baseline;
+  *vertical-align: middle;
+  line-height: normal;
+  padding-top: 9px;
+}
+.color_editor footer .color_value {
   width: 114px;
   height: 23px;
-  margin-top: 0px;
-  margin-right: 11px;
+  margin-right: 6px;
   background-color: #aaa;
-  float: left;
+  box-sizing: border-box;
+  display: inline-block;
+  color: #222;
 }
-.color_popover .color_popover .footer {
-  float: left;
-  margin-top: 12px;
+.color_editor footer input {
+  display: inline-block;
+  height: 23px;
+  padding: 0 0 0 4px;
+  border: 1px solid rgba(0,0,0,0.53);
+  box-shadow: inset 0px 1px 0px rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.15);
+  font-family: "SourceSans";
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  border-radius: 3px;
+  margin: 1px 0 0 0;
+  vertical-align: middle;
+}
+.color_editor footer input:focus {
+  background: rgba(255,255,255,0.3);
+  outline: none;
+  box-shadow: 0 0 8px rgba(0,0,0,0.35), inset 0 2px 4px rgba(0,0,0,0.15);
+  border: 1px solid #1b1d1d;
+  z-index: 911;
+}
+.color_editor footer .button-bar {
+  position: relative;
+  top: 2px;
+}
+@media all and (-webkit-min-device-pixel-ratio : 2), (min-device-pixel-ratio : 2) {
+  .color_editor .large_swatches {
+    background-image: url("../img/color_thumb_back@2x.png");
+  }
+  .color_editor .small_swatch {
+    background-image: url("../img/color_thumb_back@2x.png");
+  }
+  .color_editor .color_selection_field .selector {
+    background-image: url("../img/grabber_color-well@2x.png");
+  }
+  .color_editor .slider .selector {
+    background-image: url("../img/grabber_color-slider@2x.png");
+  }
+  .color_editor .slider.opacity_slider {
+    background-image: url("../img/color_thumb_back@2x.png");
+  }
 }
 ul,
 li {
@@ -156,6 +177,7 @@ li {
   font-size: 100%;
   vertical-align: baseline;
   background: transparent;
+  -webkit-font-smoothing: subpixel-antialiased;
 }
 .button-bar {
   list-style: none;
@@ -164,8 +186,8 @@ li {
   -moz-border-radius: 3px;
   border-radius: 3px;
   display: inline-block;
-  font-weight: 400;
-  -webkit-font-smoothing: subpixel-antialiased;
+  font-size: 12px;
+  margin-left: -3px;
 }
 .button-bar li {
   display: inline-block;
@@ -175,7 +197,7 @@ li {
   text-decoration: none;
   color: #454545;
   display: block;
-  padding: 3px 7px 5px;
+  padding: 2px 4px 4px;
   height: 15px;
   font-size: 12px;
   text-shadow: 0 1px #fff;
@@ -217,8 +239,10 @@ li {
   border-bottom-right-radius: 3px;
 }
 .button-bar li.selected a {
-  background: #e5e7e8;
+  background-color: #d7d7d7;
+  box-shadow: none;
   cursor: default;
+  background-image: none;
 }
 .button-bar li.disabled a {
   cursor: default;

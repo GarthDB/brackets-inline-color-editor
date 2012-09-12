@@ -8,8 +8,10 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 
 		constructor: (@element, color, @callback = null, @swatches = null) ->
 			@color = tinycolor(color)
+			@lastColor = color
 			@$element = $(@element)
 			@$colorValue = @$element.find('.color_value')
+			@$buttonList = @$element.find('ul.button-bar')
 			@$rgbaButton = @$element.find('.rgba')
 			@$hexButton = @$element.find('.hex')
 			@$hslButton = @$element.find('.hsla')
@@ -24,15 +26,21 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@$hueSelector = @$element.find('.hue_slider .selector_base')
 			@$opacitySlider = @$element.find('.opacity_slider')
 			@$opacitySelector = @$element.find('.opacity_slider .selector_base')
+			@$swatches = @$element.find('.swatches')
 
 			@addFieldListeners()
-			@synchronize()
+			@addSwatches()
 
+			@$lastColor.css('background-color', @lastColor)
+			@commitColor color
+
+		addSwatches: () ->
+			console.log @$swatches
 
 		addFieldListeners: () ->
 			@bindColorFormatToRadioButton('rgba')
 			@bindColorFormatToRadioButton('hex')
-			@bindColorFormatToRadioButton('hsl')
+			@bindColorFormatToRadioButton('hsla')
 			@$colorValue.change(@colorSetter)
 			@bindOriginalColorButton()
 			@bindColorSwatches()
@@ -41,9 +49,9 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@registerDragHandler('.opacity_slider', @handleOpacityDrag)
 
 		synchronize: ->
-			colorValue = @getColor()
+			colorValue = @getColor().toString()
 			colorObject = tinycolor(colorValue)
-			hueColor = 'hsl(' + this.hsv.h + ', 100%, 50%)'
+			hueColor = 'hsl(' + @hsv.h + ', 100%, 50%)'
 
 			@updateColorTypeRadioButtons(colorObject.format)
 
@@ -58,37 +66,44 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@$opacityGradient.css('background-image', '-webkit-gradient(linear, 0% 0%, 0% 100%, from(' + hueColor + '), to(transparent))')
 
 			# Slider positions
-			@$hueSelector.css('bottom', (this.hsv.h / 360 * 100) + "%")
-			@$opacitySelector.css('bottom', (this.hsv.a * 100) + "%")
-			@$selectionBase.css({left: (this.hsv.s * 100) + '%', bottom: (this.hsv.v * 100) + '%'})
+			@$hueSelector.css('bottom', (@hsv.h / 360 * 100) + "%")
+			@$opacitySelector.css('bottom', (@hsv.a * 100) + "%")
+			if !isNaN(@hsv.s)
+				@hsv.s = (@hsv.s*100) + '%'
+			if !isNaN(@hsv.v)
+				@hsv.v = (@hsv.v*100) + '%'
+			@$selectionBase.css({left: @hsv.s, bottom: @hsv.v})
 
 		colorSetter: ->
-			newValue = $.trim(this.$colorValue.val())
+			newValue = $.trim(@$colorValue.val())
 			newColor = tinycolor(newValue)
 			if (!newColor.ok)
-				newValue = this.getColor()
+				newValue = @getColor()
 				newColor = tinycolor(newValue)
 			@commitColor(newValue, true)
 			@hsv = newColor.toHsv()
 			@synchronize() #todo - see if this is needed
 
 		getColor: ->
-			return (@color || this.defaultColor)
+			return (@color || @defaultColor)
 
 		updateColorTypeRadioButtons: (format) ->
+			@$buttonList.find('li').removeClass('selected')
+			@$buttonList.find('.'+format).parent().addClass('selected')
 			switch (format)
 				when 'rgb'
-					this.$rgbaButton.attr('checked', true)
+					@$buttonList.find('.rgba').parent().addClass('selected')
 				when 'hex', 'name'
-					this.$hexButton.attr('checked', true)
+					@$buttonList.find('.hex').parent().addClass('selected')
 				when 'hsl'
-					this.$hslButton.attr('checked', true)
+					@$buttonList.find('.hsla').parent().addClass('selected')
 				# when 'hsv'
 				# // hsv found, currently unsupported.
 
 		bindColorFormatToRadioButton: (buttonClass, propertyName, value) ->
-			handler = (event) ->
-				newFormat = event.currentTarget.value;
+			handler = (event) =>
+				newFormat = $(event.currentTarget).html().toLowerCase()
+				console.log newFormat
 				newColor = @getColor();
 				colorObject = tinycolor(newColor);
 				switch newFormat
@@ -105,8 +120,8 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@$element.find('.' + buttonClass).click(handler)
 			
 		bindOriginalColorButton: ->
-			@$lastColor.click (event) ->
-				@commitColor(@.lastColor, true)
+			@$lastColor.click (event) =>
+				@commitColor(@lastColor, true)
 
 		bindColorSwatches: ->
 			handler = (event) ->
@@ -128,10 +143,11 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 				self.$el.find('#swatch_' + index).children('.color_swatch').css('background-color', value)
 
 		setColorAsHsv: (hsv, commitHsv) ->
-			hsv.h = @hsv.h
-			hsv.a = @hsv.a
-			newColor = tinycolor(hsv)
-			oldColor = tinycolor(this.getColor())
+			newHsv = @hsv
+			for k, v of hsv
+				newHsv[k] = v
+			newColor = tinycolor(newHsv)
+			oldColor = tinycolor(@getColor())
 			oldFormat = oldColor.format
 			colorVal
 			switch oldFormat
@@ -144,11 +160,14 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 
 			@commitColor(colorVal, commitHsv)
 
-		commitColor: (colorVal, resetHsv) ->
+		commitColor: (colorVal, resetHsv = true) ->
+			@callback colorVal
+			@color = colorVal
 			@$colorValue.val(colorVal)
 			if resetHsv
 				colorObj = tinycolor(colorVal)
 				@hsv = colorObj.toHsv()
+				@color = colorObj
 			@synchronize()
 
 
@@ -162,21 +181,23 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			hsv = {}
 			hsv.s = xOffset / width
 			hsv.v = 1 - yOffset / height
-			@setColorAsHsv(hsv)
+			@setColorAsHsv(hsv, false)
 
 		handleHueDrag: (event) =>
 			offset = event.clientY - @$hueSlider.offset().top;
 			height = @$hueSlider.height();
 			offset = Math.min(height, Math.max(0, offset));
-			@hsv.h = (1 - offset / height) * 360;
-			@setColorAsHsv(@hsv)
+			hsv = {}
+			hsv.h = (1 - offset / height) * 360;
+			@setColorAsHsv(hsv, false)
 
 		handleOpacityDrag: (event) =>
 			offset = event.clientY - @$opacitySlider.offset().top
 			height = @$opacitySlider.height()
 			offset = Math.min(height, Math.max(0, offset))
-			@hsv.a = (1 - offset / height)
-			@setColorAsHsv(@hsv)
+			hsv = {}
+			hsv.a = (1 - offset / height)
+			@setColorAsHsv(hsv, false)
         
 		registerDragHandler: (selector, handler) =>
 			@$element.find(selector).on "mousedown.colorpopoverview", (event) =>

@@ -23,8 +23,10 @@
         this.handleHueDrag = __bind(this.handleHueDrag, this);
 
         this.color = tinycolor(color);
+        this.lastColor = color;
         this.$element = $(this.element);
         this.$colorValue = this.$element.find('.color_value');
+        this.$buttonList = this.$element.find('ul.button-bar');
         this.$rgbaButton = this.$element.find('.rgba');
         this.$hexButton = this.$element.find('.hex');
         this.$hslButton = this.$element.find('.hsla');
@@ -39,14 +41,21 @@
         this.$hueSelector = this.$element.find('.hue_slider .selector_base');
         this.$opacitySlider = this.$element.find('.opacity_slider');
         this.$opacitySelector = this.$element.find('.opacity_slider .selector_base');
+        this.$swatches = this.$element.find('.swatches');
         this.addFieldListeners();
-        this.synchronize();
+        this.addSwatches();
+        this.$lastColor.css('background-color', this.lastColor);
+        this.commitColor(color);
       }
+
+      ColorEditor.prototype.addSwatches = function() {
+        return console.log(this.$swatches);
+      };
 
       ColorEditor.prototype.addFieldListeners = function() {
         this.bindColorFormatToRadioButton('rgba');
         this.bindColorFormatToRadioButton('hex');
-        this.bindColorFormatToRadioButton('hsl');
+        this.bindColorFormatToRadioButton('hsla');
         this.$colorValue.change(this.colorSetter);
         this.bindOriginalColorButton();
         this.bindColorSwatches();
@@ -57,7 +66,7 @@
 
       ColorEditor.prototype.synchronize = function() {
         var colorObject, colorValue, hueColor;
-        colorValue = this.getColor();
+        colorValue = this.getColor().toString();
         colorObject = tinycolor(colorValue);
         hueColor = 'hsl(' + this.hsv.h + ', 100%, 50%)';
         this.updateColorTypeRadioButtons(colorObject.format);
@@ -69,9 +78,15 @@
         this.$opacityGradient.css('background-image', '-webkit-gradient(linear, 0% 0%, 0% 100%, from(' + hueColor + '), to(transparent))');
         this.$hueSelector.css('bottom', (this.hsv.h / 360 * 100) + "%");
         this.$opacitySelector.css('bottom', (this.hsv.a * 100) + "%");
+        if (!isNaN(this.hsv.s)) {
+          this.hsv.s = (this.hsv.s * 100) + '%';
+        }
+        if (!isNaN(this.hsv.v)) {
+          this.hsv.v = (this.hsv.v * 100) + '%';
+        }
         return this.$selectionBase.css({
-          left: (this.hsv.s * 100) + '%',
-          bottom: (this.hsv.v * 100) + '%'
+          left: this.hsv.s,
+          bottom: this.hsv.v
         });
       };
 
@@ -93,23 +108,27 @@
       };
 
       ColorEditor.prototype.updateColorTypeRadioButtons = function(format) {
+        this.$buttonList.find('li').removeClass('selected');
+        this.$buttonList.find('.' + format).parent().addClass('selected');
         switch (format) {
           case 'rgb':
-            return this.$rgbaButton.attr('checked', true);
+            return this.$buttonList.find('.rgba').parent().addClass('selected');
           case 'hex':
           case 'name':
-            return this.$hexButton.attr('checked', true);
+            return this.$buttonList.find('.hex').parent().addClass('selected');
           case 'hsl':
-            return this.$hslButton.attr('checked', true);
+            return this.$buttonList.find('.hsla').parent().addClass('selected');
         }
       };
 
       ColorEditor.prototype.bindColorFormatToRadioButton = function(buttonClass, propertyName, value) {
-        var handler;
+        var handler,
+          _this = this;
         handler = function(event) {
           var colorObject, newColor, newFormat;
-          newFormat = event.currentTarget.value;
-          newColor = this.getColor();
+          newFormat = $(event.currentTarget).html().toLowerCase();
+          console.log(newFormat);
+          newColor = _this.getColor();
           colorObject = tinycolor(newColor);
           switch (newFormat) {
             case 'hsla':
@@ -120,17 +139,18 @@
               break;
             case 'hex':
               newColor = colorObject.toHexString();
-              this.hsv.a = 1;
-              this.synchronize();
+              _this.hsv.a = 1;
+              _this.synchronize();
           }
-          return this.commitColor(newColor, false);
+          return _this.commitColor(newColor, false);
         };
         return this.$element.find('.' + buttonClass).click(handler);
       };
 
       ColorEditor.prototype.bindOriginalColorButton = function() {
+        var _this = this;
         return this.$lastColor.click(function(event) {
-          return this.commitColor(this.lastColor, true);
+          return _this.commitColor(_this.lastColor, true);
         });
       };
 
@@ -162,10 +182,13 @@
       };
 
       ColorEditor.prototype.setColorAsHsv = function(hsv, commitHsv) {
-        var colorVal, newColor, oldColor, oldFormat;
-        hsv.h = this.hsv.h;
-        hsv.a = this.hsv.a;
-        newColor = tinycolor(hsv);
+        var colorVal, k, newColor, newHsv, oldColor, oldFormat, v;
+        newHsv = this.hsv;
+        for (k in hsv) {
+          v = hsv[k];
+          newHsv[k] = v;
+        }
+        newColor = tinycolor(newHsv);
         oldColor = tinycolor(this.getColor());
         oldFormat = oldColor.format;
         colorVal;
@@ -186,10 +209,16 @@
 
       ColorEditor.prototype.commitColor = function(colorVal, resetHsv) {
         var colorObj;
+        if (resetHsv == null) {
+          resetHsv = true;
+        }
+        this.callback(colorVal);
+        this.color = colorVal;
         this.$colorValue.val(colorVal);
         if (resetHsv) {
           colorObj = tinycolor(colorVal);
           this.hsv = colorObj.toHsv();
+          this.color = colorObj;
         }
         return this.synchronize();
       };
@@ -205,25 +234,27 @@
         hsv = {};
         hsv.s = xOffset / width;
         hsv.v = 1 - yOffset / height;
-        return this.setColorAsHsv(hsv);
+        return this.setColorAsHsv(hsv, false);
       };
 
       ColorEditor.prototype.handleHueDrag = function(event) {
-        var height, offset;
+        var height, hsv, offset;
         offset = event.clientY - this.$hueSlider.offset().top;
         height = this.$hueSlider.height();
         offset = Math.min(height, Math.max(0, offset));
-        this.hsv.h = (1 - offset / height) * 360;
-        return this.setColorAsHsv(this.hsv);
+        hsv = {};
+        hsv.h = (1 - offset / height) * 360;
+        return this.setColorAsHsv(hsv, false);
       };
 
       ColorEditor.prototype.handleOpacityDrag = function(event) {
-        var height, offset;
+        var height, hsv, offset;
         offset = event.clientY - this.$opacitySlider.offset().top;
         height = this.$opacitySlider.height();
         offset = Math.min(height, Math.max(0, offset));
-        this.hsv.a = 1 - offset / height;
-        return this.setColorAsHsv(this.hsv);
+        hsv = {};
+        hsv.a = 1 - offset / height;
+        return this.setColorAsHsv(hsv, false);
       };
 
       ColorEditor.prototype.registerDragHandler = function(selector, handler) {

@@ -1,60 +1,65 @@
-.color_popover
+.color_editor
 	width 232px
-	.header
+	padding 16px
+	header
 		width 100%
 		overflow auto
-		margin-bottom 5px
+		margin-bottom 10px
 
-	.large_swatches
-		border-radius 3px
-		background-image -webkit-image-set(url("../img/color_thumb_back.png") 1x, url("../img/color_thumb_back@2x.png") 2x)
-		background-size 8px
-		height auto
-		width auto
-		margin-right 9px
-		floatleft
-		overflow auto
-		box-shadow 0 1px 0 #fff
+		.large_swatches
+			border-radius 3px
+			background-image url("../img/color_thumb_back.png")
+			background-size 8px
+			height auto
+			width auto
+			margin-right 9px
+			floatleft
+			overflow auto
+			box-shadow 0 1px 0 #fff
 
-	.large_swatch
-		width 44px
-		height 35px
-		display block
-		float left
-		box-shadow inset 0 1px 0 rgba(0,0,0,.2)
+		.large_swatch
+			width 44px
+			height 35px
+			display block
+			float left
+			box-shadow inset 0 1px 0 rgba(0,0,0,.2)
 
-	.current_color
-		border-radius 3px 0px 0px 3px
-		background-color rgba(0, 187, 255, .8)
+		.current_color
+			border-radius 3px 0px 0px 3px
+			background-color rgba(0, 187, 255, .8)
 
-	.last_color
-		border-radius 0px 3px 3px 0px
-		background-color #cccccc
+		.last_color
+			border-radius 0px 3px 3px 0px
+			background-color #cccccc
 
-	.small_swatches
-		width 135px
-		float left
+	// .small_swatches
+	// 	width 135px
+	// 	float left
 
-	.small_swatch
-		background-image -webkit-image-set(url("../img/color_thumb_back.png") 1x, url("../img/color_thumb_back@2x.png") 2x)
-		width 15px
-		height 15px
-		margin-bottom 5px
-		margin-right 5px
-		float left
-		border-radius 3px
-		box-shadow 0 1px 0 #fff
-		&:last-child
-			margin-right 0px
+	// .small_swatch
+	// 	background-image url("../img/color_thumb_back.png")
+	// 	width 15px
+	// 	height 15px
+	// 	margin-bottom 5px
+	// 	margin-right 5px
+	// 	float left
+	// 	border-radius 3px
+	// 	box-shadow 0 1px 0 #fff
+	// 	&:last-child
+	// 		margin-right 0px
 
-	.color_swatch
-		box-shadow inset 0 1px 0 rgba(0,0,0,.2)
-		background-color #d9dcdc 
-		height 100%
-		width 100%
-		margin-top 0px
-		margin-left 0px
-		border-radius 3px
+	// .color_swatch
+	// 	box-shadow inset 0 1px 0 rgba(0,0,0,.2)
+	// 	background-color #d9dcdc 
+	// 	height 100%
+	// 	width 100%
+	// 	margin-top 0px
+	// 	margin-left 0px
+	// 	border-radius 3px
+
+	.sliders
+		position relative
+		clear both
 
 	.gradient_overlay
 		position absolute
@@ -67,10 +72,10 @@
 		height 156px
 		margin-right 13px
 		display block
-		float left
 		border-radius 5px 3px 3px 3px
 		position relative
 		box-shadow 0 1px 0 #fff, inset 0 1px 0 rgba(0,0,0,.2)
+		float left
 		.saturation_gradient
 			background-image -webkit-gradient(linear, 0% 50%, 100% 50%, from(white), to(rgba(255, 255, 255, 0)))
 		.luminosity_gradient
@@ -88,7 +93,8 @@
 			position absolute
 			left -4px
 			top -4px
-			background-image -webkit-image-set(url("../img/grabber_color-well.png") 1x, url("../img/grabber_color-well@2x.png") 2x)
+			background-image url("../img/grabber_color-well.png")
+			
 
 	.slider
 		border-radius 3px
@@ -97,9 +103,9 @@
 		margin-right 13px
 		background-color #CCCCCC
 		display block
-		float left
 		box-shadow 0 1px 0 #fff, inset 0 1px 0 rgba(0,0,0,.2)
-		positionrelative
+		float left
+		position relative
 		.selector_base
 			width 14px
 			height 6px
@@ -112,27 +118,65 @@
 			left -3px
 			top -3px
 			position absolute
-			background-image -webkit-image-set(url("../img/grabber_color-slider.png") 1x, url("../img/grabber_color-slider@2x.png") 2x)
+			background-image url("../img/grabber_color-slider.png")
 		&.opacity_slider
-			background-image -webkit-image-set(url("../img/color_thumb_back.png") 1x, url("../img/color_thumb_back@2x.png") 2x)
+			background-image url("../img/color_thumb_back.png")
 			background-size 8px
-			position relative
 			margin-right 0px
 
 	.hue_slider
 		background-image -webkit-linear-gradient(top, red, magenta, blue, cyan, lime, yellow, red)
-		
-	.color_value
-		width 114px
-		height 23px
-		margin-top 0px
-		margin-right 11px
-		background-color #AAAAAA
-		float left
 
-	.color_popover .footer
-		float left
-		margin-top 12px
+	footer
+		font-size 100%
+		clear both
+		vertical-align baseline
+		*vertical-align middle
+		line-height: normal
+		padding-top 9px
+		.color_value
+			width 114px
+			height 23px
+			margin-right 6px
+			background-color #AAAAAA
+			box-sizing border-box
+			display inline-block
+			color #222
+		input
+			display inline-block;
+			height 23px
+			padding 0 0 0 4px
+			border 1px solid rgba(0,0,0,.53)
+			box-shadow:inset 0px 1px 0px rgba(0,0,0,.15)
+			background rgba(255,255,255,.15)
+			font-family "SourceSans"
+			font-size: 12px
+			color: rgba(255, 255, 255, .6)
+			border-radius 3px
+			margin: 1px 0 0 0
+			vertical-align: middle
+			&:focus
+				background: rgba(255,255,255,.3)
+				outline: none
+				box-shadow: 0 0 8px rgba(0,0,0,.35), inset 0 2px 4px rgba(0,0,0,.15)
+				border: 1px solid #1b1d1d
+				z-index: 911
+		.button-bar
+			position relative
+			top 2px
 
-
+@media all and (-webkit-min-device-pixel-ratio : 2), (min-device-pixel-ratio : 2)
+	.color_editor
+		.large_swatches
+			background-image url("../img/color_thumb_back@2x.png")
+		.small_swatch
+			background-image url("../img/color_thumb_back@2x.png")
+		.color_selection_field
+			.selector
+				background-image url("../img/grabber_color-well@2x.png")
+		.slider
+			.selector
+				background-image url("../img/grabber_color-slider@2x.png")
+			&.opacity_slider
+				background-image url("../img/color_thumb_back@2x.png")
 @import button-bar

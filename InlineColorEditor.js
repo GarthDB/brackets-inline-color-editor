@@ -45,12 +45,14 @@
       };
 
       InlineColorEditor.prototype.load = function(hostEditor) {
-        var self;
+        var selectedColors, self;
         self = this;
         this.editor = hostEditor;
         this.parentClass.load.call(this, hostEditor);
+        selectedColors = this.editor._codeMirror.getValue().match(/#[a-f0-9]{6}|#[a-f0-9]{3}|rgb\( ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?\)|rgba\( ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b(1|0|0\.[0-9]{1,3}) ?\)|hsl\( ?\b([0-9]{1,2}|[12][0-9]{2}|3[0-5][0-9]|360)\b ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b([0-9]{1,2}|100)\b% ?\)|hsla\( ?\b([0-9]{1,2}|[12][0-9]{2}|3[0-5][0-9]|360)\b ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b(1|0|0\.[0-9]{1,3}) ?\)/gi);
+        selectedColors = this.usedColors(selectedColors);
         this.$wrapperDiv = $(InlineEditorTemplate);
-        this.colorEditor = new ColorEditor(this.$wrapperDiv, this.color, this.setColor);
+        this.colorEditor = new ColorEditor(this.$wrapperDiv, this.color, this.setColor, selectedColors);
         return this.$htmlContent.append(this.$wrapperDiv);
       };
 
@@ -71,6 +73,44 @@
 
       InlineColorEditor.prototype._sizeEditorToContent = function() {
         return this.hostEditor.setInlineWidgetHeight(this, this.$wrapperDiv.outerHeight(), true);
+      };
+
+      InlineColorEditor.prototype.usedColors = function(originalArray, length) {
+        var a, colorCount, compressed, copyArray, copyColor, i, originalColor, _i, _j, _len, _len1;
+        if (length == null) {
+          length = 10;
+        }
+        compressed = [];
+        copyArray = originalArray.slice(0);
+        for (_i = 0, _len = originalArray.length; _i < _len; _i++) {
+          originalColor = originalArray[_i];
+          colorCount = 0;
+          for (i = _j = 0, _len1 = copyArray.length; _j < _len1; i = ++_j) {
+            copyColor = copyArray[i];
+            if (originalColor === copyColor) {
+              colorCount++;
+              delete copyArray[i];
+            }
+          }
+          if (colorCount > 0) {
+            a = {};
+            a.value = originalColor;
+            a.count = colorCount;
+            compressed.push(a);
+          }
+        }
+        compressed.sort(function(a, b) {
+          if (a.count === b.count) {
+            return 0;
+          }
+          if (a.count > b.count) {
+            return -1;
+          }
+          if (a.count < b.count) {
+            return 1;
+          }
+        });
+        return compressed.slice(0, length);
       };
 
       return InlineColorEditor;

@@ -6,6 +6,7 @@ ul, li
 	font-size 100%
 	vertical-align baseline
 	background transparent
+	-webkit-font-smoothing subpixel-antialiased
 
 
 .button-bar
@@ -15,8 +16,9 @@ ul, li
 	-moz-border-radius 3px
 	border-radius 3px
 	display inline-block
-	font-weight 400
-	-webkit-font-smoothing subpixel-antialiased
+	// font-weight 400
+	font-size 12px
+	margin-left -3px
 	li
 		display inline-block
 		margin-left -3px
@@ -24,7 +26,7 @@ ul, li
 		text-decoration none
 		color #454545
 		display block
-		padding 3px 7px 5px
+		padding 2px 4px 4px
 		height 15px
 		font-size 12px
 		text-shadow 0 1px #FFF
@@ -61,8 +63,10 @@ ul, li
 		border-top-right-radius 3px
 		border-bottom-right-radius 3px
 	li.selected a
-		background #e5e7e8
+		background-color: #d7d7d7;
+		box-shadow: none;
 		cursor default
+		background-image none
 	li.disabled a
 		cursor default
 		color hsla(0, 0%, 27%, 0.4)

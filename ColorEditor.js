@@ -2,262 +2,241 @@
 (function() {
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  define(['helper/colors'], function(colors) {
+  define(['helper/tinycolor-min'], function(tinycolorMin) {
+    'use strict';
+
     var ColorEditor;
     return ColorEditor = (function() {
 
-      ColorEditor.prototype.hexRegEx = /[a-f0-9]{6}|#[a-f0-9]{3}/i;
+      ColorEditor.prototype.defaultColor = 'rgba(0,0,0,1)';
 
-      ColorEditor.prototype.rgbRegEx = /rgb\( ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?\)|rgba\( ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b(1|0|0\.[0-9]{1,3}) ?\)/i;
+      ColorEditor.prototype.hsv = tinycolor('rgba(0,0,0,1)').toHsv();
 
-      ColorEditor.prototype.hslRegEx = /hsl\( ?\b([0-9]{1,2}|[12][0-9]{2}|3[0-5][0-9]|360)\b ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b([0-9]{1,2}|100)\b% ?\)|hsla\( ?\b([0-9]{1,2}|[12][0-9]{2}|3[0-5][0-9]|360)\b ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b(1|0|0\.[0-9]{1,3}) ?\)/;
-
-      ColorEditor.prototype.hexTypeIndex = 0;
-
-      ColorEditor.prototype.rgbTypeIndex = 1;
-
-      ColorEditor.prototype.hslTypeIndex = 2;
-
-      function ColorEditor(element, color, callback) {
-        var _this = this;
+      function ColorEditor(element, color, callback, swatches) {
         this.element = element;
         this.callback = callback != null ? callback : null;
-        this.buttonbarButtonClickHandler = __bind(this.buttonbarButtonClickHandler, this);
+        this.swatches = swatches != null ? swatches : null;
+        this.registerDragHandler = __bind(this.registerDragHandler, this);
 
-        this.opacityMouseupHandler = __bind(this.opacityMouseupHandler, this);
+        this.handleOpacityDrag = __bind(this.handleOpacityDrag, this);
 
-        this.opacityMousemoveHandler = __bind(this.opacityMousemoveHandler, this);
+        this.handleHueDrag = __bind(this.handleHueDrag, this);
 
-        this.opacityMousedownHandler = __bind(this.opacityMousedownHandler, this);
-
-        this.hueMouseupHandler = __bind(this.hueMouseupHandler, this);
-
-        this.hueMousemoveHandler = __bind(this.hueMousemoveHandler, this);
-
-        this.hueMousedownHandler = __bind(this.hueMousedownHandler, this);
-
-        this.satLumMouseupHandler = __bind(this.satLumMouseupHandler, this);
-
-        this.satLumMousemoveHandler = __bind(this.satLumMousemoveHandler, this);
-
-        this.satLumMousedownHandler = __bind(this.satLumMousedownHandler, this);
-
-        this.setOutputType(this.hexTypeIndex);
-        this.satLumBlock = $(this.element).children('.saturation-luminosity-block')[0];
-        this.hueSlider = $(this.element).children('.hue-slider')[0];
-        this.opacitySlider = $(this.element).children('.opacity-slider')[0];
-        this.colorIndicator = $(this.element).children('.lower-controls').children('.color-indicator')[0];
-        this.originalColorIndicator = $(this.colorIndicator).children('.original-color')[0];
-        this.buttonBar = $(this.element).children('.lower-controls').children('.button-bar')[0];
-        this.originalColor = color;
-        $(this.satLumBlock).mousedown(this.satLumMousedownHandler);
-        $(this.hueSlider).mousedown(this.hueMousedownHandler);
-        $(this.opacitySlider).mousedown(this.opacityMousedownHandler);
-        $(this.buttonBar).children('li').click(this.buttonbarButtonClickHandler);
-        $(this.originalColorIndicator).css({
-          background: this.originalColor
-        });
-        $(this.originalColorIndicator).click(function() {
-          return _this.parseColor(_this.originalColor);
-        });
-        this.parseColor(color);
+        this.color = tinycolor(color);
+        this.$element = $(this.element);
+        this.$colorValue = this.$element.find('.color_value');
+        this.$rgbaButton = this.$element.find('.rgba');
+        this.$hexButton = this.$element.find('.hex');
+        this.$hslButton = this.$element.find('.hsla');
+        this.$currentColor = this.$element.find('.current_color');
+        this.$lastColor = this.$element.find('.last_color');
+        this.$selection = this.$element.find('.color_selection_field');
+        this.$selectionBase = this.$element.find('.color_selection_field .selector_base');
+        this.$hueBase = this.$element.find('.hue_slider .selector_base');
+        this.$opacityGradient = this.$element.find('.opacity_gradient');
+        this.$hueSlider = this.$element.find('.hue_slider');
+        this.$opacitySlider = this.$element.find('.opacity_slider');
+        this.$hueSelector = this.$element.find('.hue_slider .selector_base');
+        this.$opacitySlider = this.$element.find('.opacity_slider');
+        this.$opacitySelector = this.$element.find('.opacity_slider .selector_base');
+        this.addFieldListeners();
+        this.synchronize();
       }
 
-      ColorEditor.prototype.parseColor = function(color) {
-        var adjustedColorAr, colorAr, colorItem;
-        if (color.match(this.hexRegEx)) {
-          this.setOutputType(this.hexTypeIndex);
-          if (color.match(/^#?[a-f0-9]{3}$/i)) {
-            color = color.replace('#', '');
-            colorAr = color.split('');
-            color = colorAr[0] + colorAr[0] + colorAr[1] + colorAr[1] + colorAr[2] + colorAr[2];
+      ColorEditor.prototype.addFieldListeners = function() {
+        this.bindColorFormatToRadioButton('rgba');
+        this.bindColorFormatToRadioButton('hex');
+        this.bindColorFormatToRadioButton('hsl');
+        this.$colorValue.change(this.colorSetter);
+        this.bindOriginalColorButton();
+        this.bindColorSwatches();
+        this.registerDragHandler('.color_selection_field', this.handleSelectionFieldDrag);
+        this.registerDragHandler('.hue_slider', this.handleHueDrag);
+        return this.registerDragHandler('.opacity_slider', this.handleOpacityDrag);
+      };
+
+      ColorEditor.prototype.synchronize = function() {
+        var colorObject, colorValue, hueColor;
+        colorValue = this.getColor();
+        colorObject = tinycolor(colorValue);
+        hueColor = 'hsl(' + this.hsv.h + ', 100%, 50%)';
+        this.updateColorTypeRadioButtons(colorObject.format);
+        this.$colorValue.attr('value', colorValue);
+        this.$currentColor.css('background-color', colorValue);
+        this.$selection.css('background-color', hueColor);
+        this.$hueBase.css('background-color', hueColor);
+        this.$selectionBase.css('background-color', colorObject.toHexString());
+        this.$opacityGradient.css('background-image', '-webkit-gradient(linear, 0% 0%, 0% 100%, from(' + hueColor + '), to(transparent))');
+        this.$hueSelector.css('bottom', (this.hsv.h / 360 * 100) + "%");
+        this.$opacitySelector.css('bottom', (this.hsv.a * 100) + "%");
+        return this.$selectionBase.css({
+          left: (this.hsv.s * 100) + '%',
+          bottom: (this.hsv.v * 100) + '%'
+        });
+      };
+
+      ColorEditor.prototype.colorSetter = function() {
+        var newColor, newValue;
+        newValue = $.trim(this.$colorValue.val());
+        newColor = tinycolor(newValue);
+        if (!newColor.ok) {
+          newValue = this.getColor();
+          newColor = tinycolor(newValue);
+        }
+        this.commitColor(newValue, true);
+        this.hsv = newColor.toHsv();
+        return this.synchronize();
+      };
+
+      ColorEditor.prototype.getColor = function() {
+        return this.color || this.defaultColor;
+      };
+
+      ColorEditor.prototype.updateColorTypeRadioButtons = function(format) {
+        switch (format) {
+          case 'rgb':
+            return this.$rgbaButton.attr('checked', true);
+          case 'hex':
+          case 'name':
+            return this.$hexButton.attr('checked', true);
+          case 'hsl':
+            return this.$hslButton.attr('checked', true);
+        }
+      };
+
+      ColorEditor.prototype.bindColorFormatToRadioButton = function(buttonClass, propertyName, value) {
+        var handler;
+        handler = function(event) {
+          var colorObject, newColor, newFormat;
+          newFormat = event.currentTarget.value;
+          newColor = this.getColor();
+          colorObject = tinycolor(newColor);
+          switch (newFormat) {
+            case 'hsla':
+              newColor = colorObject.toHslString();
+              break;
+            case 'rgba':
+              newColor = colorObject.toRgbString();
+              break;
+            case 'hex':
+              newColor = colorObject.toHexString();
+              this.hsv.a = 1;
+              this.synchronize();
           }
-          this.color = Colors.ColorFromHex(color);
-        } else if (color.match(this.hslRegEx)) {
-          this.setOutputType(this.hslTypeIndex);
-          color = color.substring(color.indexOf('(') + 1, color.indexOf(')'));
-          color = color.replace(/( )/g, '');
-          colorAr = color.split(',');
-          adjustedColorAr = (function() {
-            var _i, _len, _results;
-            _results = [];
-            for (_i = 0, _len = colorAr.length; _i < _len; _i++) {
-              colorItem = colorAr[_i];
-              _results.push(this.parsePercentage(colorItem));
-            }
-            return _results;
-          }).call(this);
-          this.color = Colors.ColorFromHSV(adjustedColorAr[0], adjustedColorAr[1], adjustedColorAr[2]);
-          if (adjustedColorAr.length > 3) {
-            this.color.SetAlpha(adjustedColorAr[3]);
+          return this.commitColor(newColor, false);
+        };
+        return this.$element.find('.' + buttonClass).click(handler);
+      };
+
+      ColorEditor.prototype.bindOriginalColorButton = function() {
+        return this.$lastColor.click(function(event) {
+          return this.commitColor(this.lastColor, true);
+        });
+      };
+
+      ColorEditor.prototype.bindColorSwatches = function() {
+        var handler;
+        handler = function(event) {
+          var $swatch, color, hsvColor;
+          $swatch = $(event.currentTarget);
+          if ($swatch.attr('style').length > 0) {
+            color = $swatch.css('background-color');
           }
-        } else if (color.match(this.rgbRegEx)) {
-          this.setOutputType(this.rgbTypeIndex);
-          color = color.substring(color.indexOf('(') + 1, color.indexOf(')'));
-          color = color.replace(/( )/g, '');
-          colorAr = color.split(',');
-          adjustedColorAr = (function() {
-            var _i, _len, _results;
-            _results = [];
-            for (_i = 0, _len = colorAr.length; _i < _len; _i++) {
-              colorItem = colorAr[_i];
-              _results.push(this.parsePercentage(colorItem));
-            }
-            return _results;
-          }).call(this);
-          this.color = Colors.ColorFromRGB(adjustedColorAr[0], adjustedColorAr[1], adjustedColorAr[2]);
-          if (adjustedColorAr.length > 3) {
-            this.color.SetAlpha(adjustedColorAr[3]);
+          if (color.length > 0) {
+            hsvColor = tinycolor(color).toHsv();
+            return this.setColorAsHsv(hsvColor, true);
           }
-        } else {
-          this.setOutputType(this.hexTypeIndex);
-          this.color = Colors.ColorFromHex('#FFFFFF');
-          this.originalColor = '#FFFFFF';
-          console.log(this.originalColor);
-          $(this.originalColorIndicator).css({
-            background: '#FFFFFF'
+        };
+        return this.$element.find('.color_swatch').click(handler);
+      };
+
+      ColorEditor.prototype.addSwatches = function() {
+        var index, value, _i, _len, _ref, _results;
+        _ref = this.swatches;
+        _results = [];
+        for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
+          value = _ref[index];
+          _results.push(self.$el.find('#swatch_' + index).children('.color_swatch').css('background-color', value));
+        }
+        return _results;
+      };
+
+      ColorEditor.prototype.setColorAsHsv = function(hsv, commitHsv) {
+        var colorVal, newColor, oldColor, oldFormat;
+        hsv.h = this.hsv.h;
+        hsv.a = this.hsv.a;
+        newColor = tinycolor(hsv);
+        oldColor = tinycolor(this.getColor());
+        oldFormat = oldColor.format;
+        colorVal;
+
+        switch (oldFormat) {
+          case 'hsl':
+            colorVal = newColor.toHslString();
+            break;
+          case 'rgb':
+            colorVal = newColor.toRgbString();
+            break;
+          case 'hex':
+          case 'name':
+            colorVal = this.hsv.a < 1 ? newColor.toRgbString() : newColor.toHexString();
+        }
+        return this.commitColor(colorVal, commitHsv);
+      };
+
+      ColorEditor.prototype.commitColor = function(colorVal, resetHsv) {
+        var colorObj;
+        this.$colorValue.val(colorVal);
+        if (resetHsv) {
+          colorObj = tinycolor(colorVal);
+          this.hsv = colorObj.toHsv();
+        }
+        return this.synchronize();
+      };
+
+      ColorEditor.prototype.handleSelectionFieldDrag = function(event) {
+        var height, hsv, width, xOffset, yOffset;
+        yOffset = event.clientY - this.$selection.offset().top;
+        xOffset = event.clientX - this.$selection.offset().left;
+        height = this.$selection.height();
+        width = this.$selection.width();
+        xOffset = Math.min(width, Math.max(0, xOffset));
+        yOffset = Math.min(height, Math.max(0, yOffset));
+        hsv = {};
+        hsv.s = xOffset / width;
+        hsv.v = 1 - yOffset / height;
+        return this.setColorAsHsv(hsv);
+      };
+
+      ColorEditor.prototype.handleHueDrag = function(event) {
+        var height, offset;
+        offset = event.clientY - this.$hueSlider.offset().top;
+        height = this.$hueSlider.height();
+        offset = Math.min(height, Math.max(0, offset));
+        this.hsv.h = (1 - offset / height) * 360;
+        return this.setColorAsHsv(this.hsv);
+      };
+
+      ColorEditor.prototype.handleOpacityDrag = function(event) {
+        var height, offset;
+        offset = event.clientY - this.$opacitySlider.offset().top;
+        height = this.$opacitySlider.height();
+        offset = Math.min(height, Math.max(0, offset));
+        this.hsv.a = 1 - offset / height;
+        return this.setColorAsHsv(this.hsv);
+      };
+
+      ColorEditor.prototype.registerDragHandler = function(selector, handler) {
+        var _this = this;
+        return this.$element.find(selector).on("mousedown.colorpopoverview", function(event) {
+          handler.call(_this, event);
+          return $(window).on("mousemove.colorpopoverview", function(event) {
+            return handler.call(_this, event);
+          }).on("mouseup.colorpopoverview", function() {
+            $(window).off("mouseup.colorpopoverview");
+            return $(window).off("mousemove.colorpopoverview");
           });
-        }
-        return this.updateColor();
-      };
-
-      ColorEditor.prototype.parsePercentage = function(valueString) {
-        output;
-
-        var output;
-        if (valueString.indexOf('%') !== -1) {
-          valueString = valueString.replace('%', '');
-          output = parseFloat(valueString) / 100;
-        } else {
-          output = parseFloat(valueString);
-        }
-        return output;
-      };
-
-      ColorEditor.prototype.updateColor = function() {
-        var colorLabel, transparent;
-        if (this.outputStringType === this.hexTypeIndex) {
-          this.color.SetAlpha(1);
-        }
-        $(this.satLumBlock).css('background', 'hsl(' + this.color.Hue() + ', 100%, 50%)');
-        transparent = 'rgba(' + this.color.Red() + ',' + this.color.Green() + ',' + this.color.Blue() + ',0)';
-        $(this.opacitySlider).children('.opacity-gradient').css({
-          background: "-webkit-linear-gradient(top, " + this.color.HexString() + ", " + transparent + ")"
         });
-        $(this.satLumBlock).children('.selector').css({
-          left: String(this.color.Saturation() * 100) + '%',
-          bottom: String(this.color.Value() * 100) + '%'
-        });
-        $(this.hueSlider).children('.selector').css({
-          bottom: String((this.color.Hue() / 360) * 100) + '%'
-        });
-        $(this.opacitySlider).children('.selector').css({
-          bottom: String(this.color.Alpha() * 100) + '%'
-        });
-        $(this.colorIndicator).children('.selected-color').css({
-          background: 'rgba(' + this.color.Red() + ',' + this.color.Green() + ',' + this.color.Blue() + ',' + this.color.Alpha() + ')'
-        });
-        switch (this.outputStringType) {
-          case this.hexTypeIndex:
-            colorLabel = this.color.HexString();
-            break;
-          case this.rgbTypeIndex:
-            colorLabel = "" + (this.color.Red()) + "," + (this.color.Green()) + "," + (this.color.Blue());
-            if (this.color.Alpha() < 1 && this.color.Alpha() >= 0) {
-              colorLabel = "rgba(" + colorLabel + "," + (Math.round(this.color.Alpha() * 100) / 100) + ")";
-            } else {
-              colorLabel = "rgb(" + colorLabel + ")";
-            }
-            break;
-          case this.hslTypeIndex:
-            colorLabel = "hsla(" + (Math.round(this.color.Hue())) + "," + (Math.round(this.color.Saturation() * 100)) + "%," + (Math.round(this.color.Value() * 100)) + "%," + (Math.round(this.color.Alpha() * 100) / 100) + ")";
-        }
-        if (this.callback) {
-          return this.callback(colorLabel);
-        }
-      };
-
-      ColorEditor.prototype.setOutputType = function(newOutputType) {
-        this.outputStringType = newOutputType;
-        $(this.buttonBar).children().removeClass('selected');
-        return $($(this.buttonBar).children()[newOutputType]).addClass('selected');
-      };
-
-      ColorEditor.prototype.satLumMousedownHandler = function(e) {
-        this.color.SetHSV(this.color.Hue(), e.offsetX / 150, 1 - (e.offsetY / 150));
-        this.updateColor();
-        $(document).bind('mouseup', this.satLumMouseupHandler);
-        return $(document).bind('mousemove', this.satLumMousemoveHandler);
-      };
-
-      ColorEditor.prototype.satLumMousemoveHandler = function(e) {
-        var height, width, x, y;
-        x = e.originalEvent.clientX - $(this.satLumBlock).offset().left;
-        y = e.originalEvent.clientY - $(this.satLumBlock).offset().top;
-        width = $(this.satLumBlock).width();
-        height = $(this.satLumBlock).height();
-        x = x >= width ? width : x < 0 ? 0 : x;
-        y = y >= height ? height : y < 0 ? 0 : y;
-        this.color.SetHSV(this.color.Hue(), x / 150, 1 - (y / 150));
-        return this.updateColor();
-      };
-
-      ColorEditor.prototype.satLumMouseupHandler = function(e) {
-        $(document).unbind('mouseup', this.satLumMouseupHandler);
-        return $(document).unbind('mousemove', this.satLumMousemoveHandler);
-      };
-
-      ColorEditor.prototype.hueMousedownHandler = function(e) {
-        this.color.SetHSV((1 - e.offsetY / 150) * 360, this.color.Saturation(), this.color.Value());
-        this.updateColor();
-        $(document).bind('mouseup', this.hueMouseupHandler);
-        return $(document).bind('mousemove', this.hueMousemoveHandler);
-      };
-
-      ColorEditor.prototype.hueMousemoveHandler = function(e) {
-        var height, y;
-        y = e.originalEvent.clientY - $(this.hueSlider).offset().top;
-        height = $(this.hueSlider).height();
-        y = y >= height ? height : y < 0 ? 0 : y;
-        this.color.SetHSV((1 - y / height) * 360, this.color.Saturation(), this.color.Value());
-        return this.updateColor();
-      };
-
-      ColorEditor.prototype.hueMouseupHandler = function(e) {
-        $(document).unbind('mouseup', this.hueMouseupHandler);
-        return $(document).unbind('mousemove', this.hueMousemoveHandler);
-      };
-
-      ColorEditor.prototype.opacityMousedownHandler = function(e) {
-        this.color.SetHSVA(this.color.Hue(), this.color.Saturation(), this.color.Value(), 1 - e.offsetY / 150);
-        this.updateColor();
-        if (this.outputStringType === this.hexTypeIndex) {
-          this.setOutputType(this.rgbTypeIndex);
-        }
-        $(document).bind('mouseup', this.opacityMouseupHandler);
-        return $(document).bind('mousemove', this.opacityMousemoveHandler);
-      };
-
-      ColorEditor.prototype.opacityMousemoveHandler = function(e) {
-        var height, y;
-        y = e.originalEvent.clientY - $(this.opacitySlider).offset().top;
-        height = $(this.opacitySlider).height();
-        y = y >= height ? height : y < 0 ? 0 : y;
-        this.color.SetHSVA(this.color.Hue(), this.color.Saturation(), this.color.Value(), 1 - y / height);
-        return this.updateColor();
-      };
-
-      ColorEditor.prototype.opacityMouseupHandler = function(e) {
-        $(document).unbind('mouseup', this.opacityMouseupHandler);
-        return $(document).unbind('mousemove', this.opacityMousemoveHandler);
-      };
-
-      ColorEditor.prototype.buttonbarButtonClickHandler = function(e) {
-        var selectedIndex, selectedItem;
-        selectedItem = $(e.target).parent();
-        selectedIndex = $(this.buttonBar).children().index(selectedItem);
-        this.setOutputType(selectedIndex);
-        return this.updateColor();
       };
 
       return ColorEditor;

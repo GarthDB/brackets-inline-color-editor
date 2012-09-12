@@ -1,107 +1,138 @@
-corner-radius = 3px
-white-shadow = 0 1px 0px #FFF
-dark-top-border = inset 0 1px 1px rgba(0,0,0,0.4)
-checkerboard()
-	background-color #FFF
-	background-image -webkit-linear-gradient(45deg, #CDCDCD 25%, transparent 25%, transparent 75%, #CDCDCD 75%, #CDCDCD), -webkit-linear-gradient(45deg, #CDCDCD 25%, transparent 25%, transparent 75%, #CDCDCD 75%, #CDCDCD)
-	-webkit-background-size 8px 8px
-	background-position 4px 4px, 0 0
-body
-	background #EAEAEA
+.color_popover
+	width 232px
+	.header
+		width 100%
+		overflow auto
+		margin-bottom 5px
 
-.coloreditor
-	padding 20px 0
-	margin-left 20px
-	-webkit-user-select none
-	.saturation-luminosity-block
-		width 150px
-		height 150px
+	.large_swatches
+		border-radius 3px
+		background-image -webkit-image-set(url("../img/color_thumb_back.png") 1x, url("../img/color_thumb_back@2x.png") 2x)
+		background-size 8px
+		height auto
+		width auto
+		margin-right 9px
+		floatleft
+		overflow auto
+		box-shadow 0 1px 0 #fff
+
+	.large_swatch
+		width 44px
+		height 35px
+		display block
+		float left
+		box-shadow inset 0 1px 0 rgba(0,0,0,.2)
+
+	.current_color
+		border-radius 3px 0px 0px 3px
+		background-color rgba(0, 187, 255, .8)
+
+	.last_color
+		border-radius 0px 3px 3px 0px
+		background-color #cccccc
+
+	.small_swatches
+		width 135px
+		float left
+
+	.small_swatch
+		background-image -webkit-image-set(url("../img/color_thumb_back.png") 1x, url("../img/color_thumb_back@2x.png") 2x)
+		width 15px
+		height 15px
+		margin-bottom 5px
+		margin-right 5px
+		float left
+		border-radius 3px
+		box-shadow 0 1px 0 #fff
+		&:last-child
+			margin-right 0px
+
+	.color_swatch
+		box-shadow inset 0 1px 0 rgba(0,0,0,.2)
+		background-color #d9dcdc 
+		height 100%
+		width 100%
+		margin-top 0px
+		margin-left 0px
+		border-radius 3px
+
+	.gradient_overlay
+		position absolute
+		width 100%
+		height 100%
+		border-radius 3px
+
+	.color_selection_field
+		width 181px
+		height 156px
+		margin-right 13px
+		display block
+		float left
+		border-radius 5px 3px 3px 3px
 		position relative
-		display inline-block
-		margin-right 10px
-		cursor crosshair
-		border-radius corner-radius
-		box-shadow white-shadow
-		.saturation-gradient, .luminosity-gradient, .hue-block
-			width 100%
-			height 100%
-			position absolute
-			top 0
-			left 0
-			border-radius corner-radius
-			pointer-events none
-		.saturation-gradient
-			background-image -webkit-gradient(linear, left center, right center, from(rgba(255, 255, 255, 1.00)), to(rgba(255, 255, 255, 0.00)))
-		.luminosity-gradient
-			background-image -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.00)), to(rgba(0, 0, 0, 1.00)))
-			box-shadow dark-top-border
-		.selector
-			width 11px
-			height 11px
-			box-shadow 0 0 0 3px rgb(255,255,255), 0 0 2px 3px rgba(0,0,0,0.7), inset 0 0 2px 0 rgb(0,0,0,)
-			margin -5px -5px -6px -5px
-			position absolute
-			border-radius 5px
-			pointer-events none
-	.hue-slider, .opacity-slider
-		width 12px
-		height 150px
-		display inline-block
-		margin-right 10px
-		border-radius corner-radius
-		box-shadow white-shadow
-		box-shadow dark-top-border
-		position relative
-		.selector
+		box-shadow 0 1px 0 #fff, inset 0 1px 0 rgba(0,0,0,.2)
+		.saturation_gradient
+			background-image -webkit-gradient(linear, 0% 50%, 100% 50%, from(white), to(rgba(255, 255, 255, 0)))
+		.luminosity_gradient
+			background-image -webkit-gradient(linear, 0% 0%, 0% 100%, from(transparent), to(black))
+		.selector_base
 			width 12px
-			height 4px
-			border 3px solid #FFF
-			box-shadow 0 0 2px 0 rgba(0,0,0,0.7), inset 0 0 2px 0 rgb(0,0,0,)
+			height 12px
+			background-color #FFFFFF
 			position absolute
-			margin -4px -3px -5px
-			border-radius 3px
-			pointer-events none
-	.hue-slider
-		background-image: -webkit-linear-gradient(top, #F00, #F0F, #00F, #0FF, #0F0, #FF0, #F00)
-	.opacity-slider
-		position relative
-		.opacity-background, & .opacity-gradient
-			width 100%
-			height 100%
+			margin-bottom -8px
+			margin-left -5px
+		.selector
+			width 19px
+			height 19px
 			position absolute
-			top 0
-			left 0
-			border-radius corner-radius
-		.opacity-gradient
-			box-shadow dark-top-border
-		.opacity-background
-			checkerboard()
-	.lower-controls
-		position relative
-		.button-bar
+			left -4px
+			top -4px
+			background-image -webkit-image-set(url("../img/grabber_color-well.png") 1x, url("../img/grabber_color-well@2x.png") 2x)
+
+	.slider
+		border-radius 3px
+		width 12px
+		height 156px
+		margin-right 13px
+		background-color #CCCCCC
+		display block
+		float left
+		box-shadow 0 1px 0 #fff, inset 0 1px 0 rgba(0,0,0,.2)
+		positionrelative
+		.selector_base
+			width 14px
+			height 6px
+			background-color transparent
+			position absolute
+			margin -1px -6px -4px -1px
+		.selector
+			width 20px
+			height 12px
+			left -3px
+			top -3px
+			position absolute
+			background-image -webkit-image-set(url("../img/grabber_color-slider.png") 1x, url("../img/grabber_color-slider@2x.png") 2x)
+		&.opacity_slider
+			background-image -webkit-image-set(url("../img/color_thumb_back.png") 1x, url("../img/color_thumb_back@2x.png") 2x)
+			background-size 8px
 			position relative
-			top -8px
-		.color-indicator
-			width 74px
-			height 25px
-			checkerboard()
-			position relative
-			border-radius corner-radius
-			display inline-block
-			margin 10px 10px 0 0
-			.selected-color, & .original-color
-				width 50%
-				height 100%
-				position absolute
-				top 0
-				box-shadow white-shadow, dark-top-border
-			.selected-color
-				left 0
-				-webkit-border-top-left-radius corner-radius
-				-webkit-border-bottom-left-radius corner-radius
-			.original-color
-				right 0
-				-webkit-border-top-right-radius corner-radius
-				-webkit-border-bottom-right-radius corner-radius
+			margin-right 0px
+
+	.hue_slider
+		background-image -webkit-linear-gradient(top, red, magenta, blue, cyan, lime, yellow, red)
+		
+	.color_value
+		width 114px
+		height 23px
+		margin-top 0px
+		margin-right 11px
+		background-color #AAAAAA
+		float left
+
+	.color_popover .footer
+		float left
+		margin-top 12px
+
 
 @import button-bar

@@ -1,27 +1,37 @@
 
-<div class="coloreditor">
-  <div class="saturation-luminosity-block">
-    <div class="saturation-gradient"></div>
-    <div class="luminosity-gradient"></div>
-    <div class="selector"></div>
-  </div>
-  <div class="hue-slider">
-    <div class="selector"></div>
-  </div>
-  <div class="opacity-slider">
-    <div class="opacity-background"></div>
-    <div class="opacity-gradient"></div>
-    <div class="selector"></div>
-  </div>
-  <div class="lower-controls">
-    <div class="color-indicator">
-      <div class="selected-color"></div>
-      <div class="original-color"></div>
+<div class="color_popover">
+  <div class="header">
+    <div class="large_swatches">
+      <div class="current_color large_swatch"></div>
+      <div class="last_color large_swatch"></div>
     </div>
+    <div class="small_swatches">
+    </div>
+  </div>
+  <div class="color_selection_field">
+    <div class="saturation_gradient gradient_overlay"></div>
+    <div class="luminosity_gradient gradient_overlay"></div>
+    <div class="selector_base">
+      <div class="selector"></div>
+    </div>
+  </div>
+  <div class="hue_slider slider">
+    <div class="selector_base">
+      <div class="selector"></div>
+    </div>
+  </div>
+  <div class="opacity_slider slider">
+    <div class="opacity_gradient gradient_overlay"></div>
+    <div class="selector_base">
+      <div class="selector"></div>
+    </div>
+  </div>
+  <div class="footer">
+    <input class="color_value"/>
     <ul class="button-bar">
-      <li class="selected"><a href="#">Hex</a></li>
-      <li><a href="#">RGB</a></li>
-      <li><a href="#">HSL</a></li>
+      <li class="selected"><a href="#" class="rgba">RGBa</a></li>
+      <li><a href="#" class="hex">HEX</a></li>
+      <li><a href="#" class="hsla">HSLa</a></li>
     </ul>
   </div>
 </div>

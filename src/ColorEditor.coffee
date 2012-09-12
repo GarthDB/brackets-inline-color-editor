@@ -1,165 +1,211 @@
-define ['helper/colors'], (colors) ->
+define ['helper/tinycolor-min'], (tinycolorMin) ->
+	'use strict'
+
 	class ColorEditor
 
-		hexRegEx: /[a-f0-9]{6}|#[a-f0-9]{3}/i
-		rgbRegEx: /rgb\( ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?\)|rgba\( ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b([0-9]{1,2}|1[0-9]{2}|2[0-4][0-9]|25[0-5])\b ?, ?\b(1|0|0\.[0-9]{1,3}) ?\)/i
-		hslRegEx: /hsl\( ?\b([0-9]{1,2}|[12][0-9]{2}|3[0-5][0-9]|360)\b ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b([0-9]{1,2}|100)\b% ?\)|hsla\( ?\b([0-9]{1,2}|[12][0-9]{2}|3[0-5][0-9]|360)\b ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b([0-9]{1,2}|100)\b% ?, ?\b(1|0|0\.[0-9]{1,3}) ?\)/
+		defaultColor: 'rgba(0,0,0,1)'
+		hsv: tinycolor('rgba(0,0,0,1)').toHsv()
 
-		hexTypeIndex: 0
-		rgbTypeIndex: 1
-		hslTypeIndex: 2
+		constructor: (@element, color, @callback = null, @swatches = null) ->
+			@color = tinycolor(color)
+			@$element = $(@element)
+			@$colorValue = @$element.find('.color_value')
+			@$rgbaButton = @$element.find('.rgba')
+			@$hexButton = @$element.find('.hex')
+			@$hslButton = @$element.find('.hsla')
+			@$currentColor = @$element.find('.current_color')
+			@$lastColor = @$element.find('.last_color')
+			@$selection = @$element.find('.color_selection_field')
+			@$selectionBase = @$element.find('.color_selection_field .selector_base')
+			@$hueBase = @$element.find('.hue_slider .selector_base')
+			@$opacityGradient = @$element.find('.opacity_gradient')
+			@$hueSlider = @$element.find('.hue_slider')
+			@$opacitySlider = @$element.find('.opacity_slider')
+			@$hueSelector = @$element.find('.hue_slider .selector_base')
+			@$opacitySlider = @$element.find('.opacity_slider')
+			@$opacitySelector = @$element.find('.opacity_slider .selector_base')
+
+			@addFieldListeners()
+			@synchronize()
 
 
-		constructor: (@element, color, @callback = null) ->
-			@setOutputType(@hexTypeIndex)
+		addFieldListeners: () ->
+			@bindColorFormatToRadioButton('rgba')
+			@bindColorFormatToRadioButton('hex')
+			@bindColorFormatToRadioButton('hsl')
+			@$colorValue.change(@colorSetter)
+			@bindOriginalColorButton()
+			@bindColorSwatches()
+			@registerDragHandler('.color_selection_field', @handleSelectionFieldDrag)
+			@registerDragHandler('.hue_slider', @handleHueDrag)
+			@registerDragHandler('.opacity_slider', @handleOpacityDrag)
+
+		synchronize: ->
+			colorValue = @getColor()
+			colorObject = tinycolor(colorValue)
+			hueColor = 'hsl(' + this.hsv.h + ', 100%, 50%)'
+
+			@updateColorTypeRadioButtons(colorObject.format)
+
+			# Synchronize our color value input field.
+			@$colorValue.attr('value', colorValue)
+
+			# Control and gradient color updates
+			@$currentColor.css('background-color', colorValue)
+			@$selection.css('background-color', hueColor)
+			@$hueBase.css('background-color', hueColor)
+			@$selectionBase.css('background-color', colorObject.toHexString())
+			@$opacityGradient.css('background-image', '-webkit-gradient(linear, 0% 0%, 0% 100%, from(' + hueColor + '), to(transparent))')
+
+			# Slider positions
+			@$hueSelector.css('bottom', (this.hsv.h / 360 * 100) + "%")
+			@$opacitySelector.css('bottom', (this.hsv.a * 100) + "%")
+			@$selectionBase.css({left: (this.hsv.s * 100) + '%', bottom: (this.hsv.v * 100) + '%'})
+
+		colorSetter: ->
+			newValue = $.trim(this.$colorValue.val())
+			newColor = tinycolor(newValue)
+			if (!newColor.ok)
+				newValue = this.getColor()
+				newColor = tinycolor(newValue)
+			@commitColor(newValue, true)
+			@hsv = newColor.toHsv()
+			@synchronize() #todo - see if this is needed
+
+		getColor: ->
+			return (@color || this.defaultColor)
+
+		updateColorTypeRadioButtons: (format) ->
+			switch (format)
+				when 'rgb'
+					this.$rgbaButton.attr('checked', true)
+				when 'hex', 'name'
+					this.$hexButton.attr('checked', true)
+				when 'hsl'
+					this.$hslButton.attr('checked', true)
+				# when 'hsv'
+				# // hsv found, currently unsupported.
+
+		bindColorFormatToRadioButton: (buttonClass, propertyName, value) ->
+			handler = (event) ->
+				newFormat = event.currentTarget.value;
+				newColor = @getColor();
+				colorObject = tinycolor(newColor);
+				switch newFormat
+					when 'hsla'
+						newColor = colorObject.toHslString()
+					when 'rgba'
+						newColor = colorObject.toRgbString()
+					when 'hex'
+						newColor = colorObject.toHexString()
+						@hsv.a = 1
+						@synchronize()
+				@commitColor(newColor, false)
+
+			@$element.find('.' + buttonClass).click(handler)
 			
-			@satLumBlock = $(@element).children('.saturation-luminosity-block')[0]
-			@hueSlider = $(@element).children('.hue-slider')[0]
-			@opacitySlider = $(@element).children('.opacity-slider')[0]
-			@colorIndicator = $(@element).children('.lower-controls').children('.color-indicator')[0]
-			@originalColorIndicator = $(@colorIndicator).children('.original-color')[0]
-			@buttonBar = $(@element).children('.lower-controls').children('.button-bar')[0]
+		bindOriginalColorButton: ->
+			@$lastColor.click (event) ->
+				@commitColor(@.lastColor, true)
 
-			@originalColor = color
-			$(@satLumBlock).mousedown @satLumMousedownHandler
-			$(@hueSlider).mousedown @hueMousedownHandler
-			$(@opacitySlider).mousedown @opacityMousedownHandler
+		bindColorSwatches: ->
+			handler = (event) ->
+				$swatch = $(event.currentTarget)
+				#  We set the inline style on the swatch when we add colors to the well but the class
+				# has a gray background so we don't want to allow the user to pick one of the 'empty'
+				# items so check for a style attribute which should only have a background-color property
+				# and use that to determine if it's an empty well or not.
+				# Todo - this is a bit of an unintuitive way to check if empty.  Element should have a class set for empty.
+				if ($swatch.attr('style').length > 0)
+					color = $swatch.css('background-color')
+				if (color.length > 0)
+					hsvColor = tinycolor(color).toHsv()
+					@setColorAsHsv(hsvColor, true)
+			@$element.find('.color_swatch').click handler
 
-			$(@buttonBar).children('li').click @buttonbarButtonClickHandler
+		addSwatches: () ->
+			for value, index in @swatches
+				self.$el.find('#swatch_' + index).children('.color_swatch').css('background-color', value)
 
-			$(@originalColorIndicator).css({background: @originalColor})
-			$(@originalColorIndicator).click =>
-				@parseColor @originalColor
-				
-			@parseColor color
+		setColorAsHsv: (hsv, commitHsv) ->
+			hsv.h = @hsv.h
+			hsv.a = @hsv.a
+			newColor = tinycolor(hsv)
+			oldColor = tinycolor(this.getColor())
+			oldFormat = oldColor.format
+			colorVal
+			switch oldFormat
+				when 'hsl'
+					colorVal = newColor.toHslString()
+				when 'rgb'
+					colorVal = newColor.toRgbString()
+				when 'hex', 'name' # Handle case of alpha < 1 for hex format, we need to fall back to RGB
+					colorVal = if @hsv.a < 1 then newColor.toRgbString() else newColor.toHexString()
 
-		parseColor: (color) ->
-			if color.match(@hexRegEx)
-				@setOutputType(@hexTypeIndex)
-				if color.match(/^#?[a-f0-9]{3}$/i)
-					color = color.replace('#','')
-					colorAr = color.split('')
-					color = colorAr[0]+colorAr[0]+colorAr[1]+colorAr[1]+colorAr[2]+colorAr[2]
-				@color = Colors.ColorFromHex(color)
-			else if color.match(@hslRegEx)
-				@setOutputType(@hslTypeIndex)
-				color = color.substring(color.indexOf('(')+1,color.indexOf(')'))
-				color = color.replace(/( )/g,'')
-				colorAr = color.split(',')
-				adjustedColorAr = (@parsePercentage colorItem for colorItem in colorAr)
-				@color = Colors.ColorFromHSV adjustedColorAr[0],adjustedColorAr[1],adjustedColorAr[2]
-				if (adjustedColorAr.length > 3) then @color.SetAlpha(adjustedColorAr[3])
-			else if color.match(@rgbRegEx)
-				@setOutputType(@rgbTypeIndex)
-				color = color.substring(color.indexOf('(')+1,color.indexOf(')'))
-				color = color.replace(/( )/g,'')
-				colorAr = color.split(',')
-				adjustedColorAr = (@parsePercentage colorItem for colorItem in colorAr)
-				@color = Colors.ColorFromRGB adjustedColorAr[0],adjustedColorAr[1],adjustedColorAr[2]
-				if (adjustedColorAr.length > 3) then @color.SetAlpha(adjustedColorAr[3])
-			else
-				@setOutputType(@hexTypeIndex)
-				@color = Colors.ColorFromHex('#FFFFFF')
-				@originalColor = '#FFFFFF'
-				console.log @originalColor
-				$(@originalColorIndicator).css({background: '#FFFFFF'})
-			@updateColor()
-		parsePercentage: (valueString) ->
-			output
-			if valueString.indexOf('%') != -1
-				valueString = valueString.replace('%','')
-				output = parseFloat(valueString)/100
-			else
-				output = parseFloat(valueString)
-			return output
-		updateColor: () ->
-			if @outputStringType is @hexTypeIndex
-				@color.SetAlpha(1)
-			$(@satLumBlock).css('background', 'hsl('+@color.Hue()+', 100%, 50%)')
-			transparent = 'rgba('+@color.Red()+','+@color.Green()+','+@color.Blue()+',0)'
-			$(@opacitySlider).children('.opacity-gradient').css({background: "-webkit-linear-gradient(top, "+@color.HexString()+", "+transparent+")"})
-			$(@satLumBlock).children('.selector').css({left: String(@color.Saturation()*100)+'%', bottom: String(@color.Value()*100)+'%'})
-			$(@hueSlider).children('.selector').css({bottom: String((@color.Hue()/360) * 100)+'%'})
-			$(@opacitySlider).children('.selector').css({bottom: String(@color.Alpha() * 100)+'%'})
-			$(@colorIndicator).children('.selected-color').css({background: 'rgba('+@color.Red()+','+@color.Green()+','+@color.Blue()+','+@color.Alpha()+')'})
+			@commitColor(colorVal, commitHsv)
 
-			switch @outputStringType
-				when @hexTypeIndex
-					colorLabel = @color.HexString()
-				when @rgbTypeIndex
-					colorLabel = "#{@color.Red()},#{@color.Green()},#{@color.Blue()}"
-					if @color.Alpha() < 1 and @color.Alpha() >= 0
-						colorLabel = "rgba(#{colorLabel},#{Math.round(@color.Alpha() * 100)/100})"
-					else
-						colorLabel = "rgb(#{colorLabel})"
-				when @hslTypeIndex
-					colorLabel = "hsla(#{Math.round(@color.Hue())},#{Math.round(@color.Saturation()*100)}%,#{Math.round(@color.Value()*100)}%,#{Math.round(@color.Alpha() * 100)/100})"
+		commitColor: (colorVal, resetHsv) ->
+			@$colorValue.val(colorVal)
+			if resetHsv
+				colorObj = tinycolor(colorVal)
+				@hsv = colorObj.toHsv()
+			@synchronize()
 
 
-			if (@callback)
-				@callback(colorLabel)
+		handleSelectionFieldDrag: (event) ->
+			yOffset = event.clientY - @$selection.offset().top
+			xOffset = event.clientX - @$selection.offset().left
+			height = @$selection.height()
+			width = @$selection.width()
+			xOffset = Math.min(width, Math.max(0, xOffset));
+			yOffset = Math.min(height, Math.max(0, yOffset))
+			hsv = {}
+			hsv.s = xOffset / width
+			hsv.v = 1 - yOffset / height
+			@setColorAsHsv(hsv)
 
-		setOutputType: (newOutputType) ->
-			@outputStringType = newOutputType
-			$(@buttonBar).children().removeClass('selected')
-			$($(@buttonBar).children()[newOutputType]).addClass('selected')
+		handleHueDrag: (event) =>
+			offset = event.clientY - @$hueSlider.offset().top;
+			height = @$hueSlider.height();
+			offset = Math.min(height, Math.max(0, offset));
+			@hsv.h = (1 - offset / height) * 360;
+			@setColorAsHsv(@hsv)
 
-		satLumMousedownHandler: (e) =>
-			@color.SetHSV( @color.Hue(), e.offsetX/150, 1 - (e.offsetY/150))
-			@updateColor()
-			$(document).bind 'mouseup', @satLumMouseupHandler
-			$(document).bind 'mousemove', @satLumMousemoveHandler
-		satLumMousemoveHandler: (e) =>
-			x = e.originalEvent.clientX - $(@satLumBlock).offset().left
-			y = e.originalEvent.clientY - $(@satLumBlock).offset().top
-			width = $(@satLumBlock).width()
-			height = $(@satLumBlock).height()
-			x = if (x >= width) then width else if (x < 0) then 0 else x
-			y = if (y >= height) then height else if (y < 0) then 0 else y
-			@color.SetHSV( @color.Hue(), x/150, 1 - (y/150))
-			@updateColor()
-		satLumMouseupHandler: (e) =>
-			$(document).unbind 'mouseup', @satLumMouseupHandler
-			$(document).unbind 'mousemove', @satLumMousemoveHandler
-		
-		hueMousedownHandler: (e) =>
-			@color.SetHSV( (1 - e.offsetY/150) * 360, @color.Saturation(), @color.Value() )
-			@updateColor()
-			$(document).bind 'mouseup', @hueMouseupHandler
-			$(document).bind 'mousemove', @hueMousemoveHandler
-		hueMousemoveHandler: (e) =>
-			y = e.originalEvent.clientY - $(@hueSlider).offset().top
-			height = $(@hueSlider).height()
-			y = if (y >= height) then height else if (y < 0) then 0 else y
-			@color.SetHSV( (1 - y/height) * 360, @color.Saturation(), @color.Value() )
-			@updateColor()
-		hueMouseupHandler: (e) =>
-			$(document).unbind 'mouseup', @hueMouseupHandler
-			$(document).unbind 'mousemove', @hueMousemoveHandler
-		
-		opacityMousedownHandler: (e) =>
-			@color.SetHSVA( @color.Hue(), @color.Saturation(), @color.Value(), (1 - e.offsetY/150) )
-			@updateColor()
-			if @outputStringType is @hexTypeIndex
-				@setOutputType(@rgbTypeIndex)
-			$(document).bind 'mouseup', @opacityMouseupHandler
-			$(document).bind 'mousemove', @opacityMousemoveHandler
-		opacityMousemoveHandler: (e) =>
-			y = e.originalEvent.clientY - $(@opacitySlider).offset().top
-			height = $(@opacitySlider).height()
-			y = if (y >= height) then height else if (y < 0) then 0 else y
-			@color.SetHSVA( @color.Hue(), @color.Saturation(), @color.Value(), (1 - y/height) )
-			@updateColor()
-		opacityMouseupHandler: (e) =>
-			$(document).unbind 'mouseup', @opacityMouseupHandler
-			$(document).unbind 'mousemove', @opacityMousemoveHandler
+		handleOpacityDrag: (event) =>
+			offset = event.clientY - @$opacitySlider.offset().top
+			height = @$opacitySlider.height()
+			offset = Math.min(height, Math.max(0, offset))
+			@hsv.a = (1 - offset / height)
+			@setColorAsHsv(@hsv)
+        
+		registerDragHandler: (selector, handler) =>
+			@$element.find(selector).on "mousedown.colorpopoverview", (event) =>
+				handler.call @, event
+				$(window).on("mousemove.colorpopoverview", (event) =>
+					handler.call @, event
+				).on "mouseup.colorpopoverview", ->
+					$(window).off "mouseup.colorpopoverview"
+					$(window).off "mousemove.colorpopoverview"
 
 
-		buttonbarButtonClickHandler: (e) =>
-			selectedItem = $(e.target).parent()
-			selectedIndex = $(@buttonBar).children().index(selectedItem)
-			@setOutputType(selectedIndex)
-			@updateColor()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

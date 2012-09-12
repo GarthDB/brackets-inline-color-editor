@@ -1,22 +1,28 @@
-.coloreditor
-	.saturation-luminosity-block
-		.saturation-gradient
-		.luminosity-gradient
-		.selector
-	.hue-slider
-		.selector
-	.opacity-slider
-		.opacity-background
-		.opacity-gradient
-		.selector
-	.lower-controls
-		.color-indicator
-			.selected-color
-			.original-color
+.color_popover
+	.header
+		.large_swatches
+			.current_color.large_swatch
+			.last_color.large_swatch
+		.small_swatches
+			//- <% for (var i = 0; i < 14; i++) { %> <div class="small_swatch <%= (i + 1) % 7 ? '' : 'last' %>" id='swatch_<%= i %>'><div class="color_swatch"></div> </div> <% }; %>
+	.color_selection_field
+		.saturation_gradient.gradient_overlay
+		.luminosity_gradient.gradient_overlay
+		.selector_base
+			.selector
+	.hue_slider.slider
+		.selector_base
+			.selector
+	.opacity_slider.slider
+		.opacity_gradient.gradient_overlay
+		.selector_base
+			.selector
+	.footer
+		input.color_value
 		ul.button-bar
 			li.selected
-				a(href="#") Hex
+				a.rgba(href="#") RGBa
 			li
-				a(href="#") RGB
+				a.hex(href="#") HEX
 			li
-				a(href="#") HSL
+				a.hsla(href="#") HSLa

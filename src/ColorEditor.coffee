@@ -74,6 +74,13 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 				@hsv.v = (@hsv.v*100) + '%'
 			@$selectionBase.css({left: @hsv.s, bottom: @hsv.v})
 
+		focus: ->
+			if !@$selection.find('.selector_base').is(":focus")
+				@$selection.find('.selector_base').focus()
+				return true
+			return false
+
+
 		colorSetter: ->
 			newValue = $.trim(@$colorValue.val())
 			newColor = tinycolor(newValue)
@@ -221,38 +228,48 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 		handleSelectionFocus: (event) =>
 			switch event.keyCode
 				when 37 #left
+					step = 1.5
+					step = if event.shiftKey then step * 5 else step
+					xOffset = Number($.trim(@$selectionBase.css('left').replace('%', '')))
+					xOffset = Math.min(100, Math.max(0, xOffset - step));
 					hsv = {}
-					sat = $.trim(@hsv.s.replace('%', ''))
-					if sat > 0
-						hsv.s = if (sat - 1) <= 0 then 0 else (sat - 1)
-						@setColorAsHsv(hsv)
+					hsv.s = xOffset/100
+					@setColorAsHsv(hsv, false)
 					return false
 				when 39 #right
+					step = 1.5
+					step = if event.shiftKey then step * 5 else step
+					xOffset = Number($.trim(@$selectionBase.css('left').replace('%', '')))
+					xOffset = Math.min(100, Math.max(0, xOffset + step));
 					hsv = {}
-					sat = $.trim(@hsv.s.replace('%', ''))
-					if sat < 100
-						hsv.s = if (Number(sat) + 1) >= 100 then 100 else (Number(sat) + 1)
-						@setColorAsHsv(hsv)
+					hsv.s = xOffset / 100
+					@setColorAsHsv(hsv, false)
 					return false
 				when 40 #down
+					step = 1.5
+					step = if event.shiftKey then step * 5 else step
+					yOffset = Number($.trim(@$selectionBase.css('bottom').replace('%', '')))
+					yOffset = Math.min(100, Math.max(0, yOffset - step))
 					hsv = {}
-					value = $.trim(@hsv.v.replace('%', ''))
-					if value > 0
-						hsv.v = if (value - 1) <= 0 then 0 else (value - 1)
-						@setColorAsHsv(hsv)
+					hsv.v = yOffset / 100
+					@setColorAsHsv(hsv, false)
 					return false
 				when 38 #up
+					step = 1.5
+					step = if event.shiftKey then step * 5 else step
+					yOffset = Number($.trim(@$selectionBase.css('bottom').replace('%', '')))
+					yOffset = Math.min(100, Math.max(0, yOffset + step))
 					hsv = {}
-					value = $.trim(@hsv.v.replace('%', ''))
-					if value < 100
-						hsv.v = if (Number(value) + 1) >= 100 then 100 else (Number(value) + 1)
-						@setColorAsHsv(hsv)
+					hsv.v = yOffset / 100
+					@setColorAsHsv(hsv, false)
 					return false
 
 		handleHueFocus: (event) =>
-			step = 3.6
+			
 			switch event.keyCode
 				when 40 #down
+					step = 3.6
+					step = if event.shiftKey then step * 5 else step
 					hsv = {}
 					hue = Number(@hsv.h)
 					if hue > 0
@@ -260,6 +277,8 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 						@setColorAsHsv(hsv)
 					return false
 				when 38 #up
+					step = 3.6
+					step = if event.shiftKey then step * 5 else step
 					hsv = {}
 					hue = Number(@hsv.h)
 					if hue < 360
@@ -268,9 +287,10 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 					return false
 
 		handleOpacityFocus: (event) =>
-			step = 0.01
 			switch event.keyCode
 				when 40 #down
+					step = 0.01
+					step = if event.shiftKey then step * 5 else step
 					hsv = {}
 					alpha = @hsv.a
 					if alpha > 0
@@ -278,6 +298,8 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 						@setColorAsHsv(hsv)
 					return false
 				when 38 #up
+					step = 0.01
+					step = if event.shiftKey then step * 5 else step
 					hsv = {}
 					alpha = @hsv.a
 					if alpha < 100

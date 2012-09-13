@@ -46,14 +46,23 @@
   cursor: pointer;
   height: 20px;
 }
-.color_editor ul.swatches li .swatch {
-  display: inline-block;
+.color_editor ul.swatches li .swatch_bg {
+  background-image: url("../img/color_thumb_back.png");
+  background-size: 8px;
   width: 15px;
   height: 15px;
   border-radius: 3px;
-  box-shadow: 0 -1px 0 rgba(0,0,0,0.2), 0 1px 0 #fff;
   position: relative;
   top: 3px;
+  display: inline-block;
+}
+.color_editor ul.swatches li .swatch_bg .swatch {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 3px;
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.2), 0 1px 0 #fff;
+  top: 0;
 }
 .color_editor .sliders {
   position: relative;

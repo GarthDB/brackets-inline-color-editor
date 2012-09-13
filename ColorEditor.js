@@ -182,7 +182,7 @@
         _ref = this.swatches;
         for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
           swatch = _ref[index];
-          this.$swatches.append("<li><div class=\"swatch\" style=\"background-color: " + swatch.value + ";\"></div> <span class=\"value\">" + swatch.value + "</span></li>");
+          this.$swatches.append("<li><div class=\"swatch_bg\"><div class=\"swatch\" style=\"background-color: " + swatch.value + ";\"></div></div> <span class=\"value\">" + swatch.value + "</span></li>");
         }
         return this.$swatches.find('li').click(function(event) {
           return _this.commitColor($(event.currentTarget).find('.value').html());

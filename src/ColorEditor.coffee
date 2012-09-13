@@ -139,7 +139,7 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 
 		addSwatches: () ->
 			for swatch, index in @swatches
-				@$swatches.append("<li><div class=\"swatch\" style=\"background-color: #{swatch.value};\"></div> <span class=\"value\">#{swatch.value}</span></li>")
+				@$swatches.append("<li><div class=\"swatch_bg\"><div class=\"swatch\" style=\"background-color: #{swatch.value};\"></div></div> <span class=\"value\">#{swatch.value}</span></li>")
 			@$swatches.find('li').click (event) =>
 				@commitColor $(event.currentTarget).find('.value').html()
 

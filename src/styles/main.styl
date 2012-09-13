@@ -185,11 +185,21 @@
 				.swatch_bg
 					background-image url("../img/color_thumb_back@2x.png")
 		.color_selection_field
+			.saturation_gradient
+				background-image -webkit-gradient(linear, 0% 25%, 50% 25%, from(white), to(rgba(255, 255, 255, 0)))
+			.luminosity_gradient
+				background-image -webkit-gradient(linear, 0% 0%, 0% 50%, from(transparent), to(black))
 			.selector
 				background-image url("../img/grabber_color-well@2x.png")
+				background-size 100% 100%
 		.slider
 			.selector
 				background-image url("../img/grabber_color-slider@2x.png")
+				background-size 200% 100%
 			&.opacity_slider
 				background-image url("../img/color_thumb_back@2x.png")
+				.opacity_gradient
+					background-size contain
+		.hue_slider
+			background-image -webkit-linear-gradient(top, red, magenta, blue, cyan, lime, yellow, red, magenta, blue, cyan, lime, yellow, red)
 @import button-bar

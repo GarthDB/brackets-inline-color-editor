@@ -281,7 +281,7 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 					hsv = {}
 					alpha = @hsv.a
 					if alpha < 100
-						hsv.v = if (alpha + step) >= 1 then 1 else (alpha + step)
+						hsv.a = if (alpha + step) >= 1 then 1 else (alpha + step)
 						@setColorAsHsv(hsv)
 
 		registerFocusHandler: (element, handler) =>

@@ -364,7 +364,7 @@
             hsv = {};
             alpha = this.hsv.a;
             if (alpha < 100) {
-              hsv.v = (alpha + step) >= 1 ? 1 : alpha + step;
+              hsv.a = (alpha + step) >= 1 ? 1 : alpha + step;
               return this.setColorAsHsv(hsv);
             }
         }

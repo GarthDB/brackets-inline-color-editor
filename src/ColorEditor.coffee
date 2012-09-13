@@ -34,9 +34,6 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@$lastColor.css('background-color', @lastColor)
 			@commitColor color
 
-		addSwatches: () ->
-			console.log @$swatches
-
 		addFieldListeners: () ->
 			@bindColorFormatToRadioButton('rgba')
 			@bindColorFormatToRadioButton('hex')
@@ -47,6 +44,9 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@registerDragHandler('.color_selection_field', @handleSelectionFieldDrag)
 			@registerDragHandler('.hue_slider', @handleHueDrag)
 			@registerDragHandler('.opacity_slider', @handleOpacityDrag)
+			@registerFocusHandler(@$selection.find('.selector_base'), @handleSelectionFocus)
+			@registerFocusHandler(@$hueSlider.find('.selector_base'), @handleHueFocus)
+			@registerFocusHandler(@$opacitySlider.find('.selector_base'), @handleOpacityFocus)
 
 		synchronize: ->
 			colorValue = @getColor().toString()
@@ -103,7 +103,6 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 		bindColorFormatToRadioButton: (buttonClass, propertyName, value) ->
 			handler = (event) =>
 				newFormat = $(event.currentTarget).html().toLowerCase()
-				console.log newFormat
 				newColor = @getColor();
 				colorObject = tinycolor(newColor);
 				switch newFormat
@@ -139,8 +138,11 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@$element.find('.color_swatch').click handler
 
 		addSwatches: () ->
-			for value, index in @swatches
-				self.$el.find('#swatch_' + index).children('.color_swatch').css('background-color', value)
+			for swatch, index in @swatches
+				@$swatches.append("<li><div class=\"swatch\" style=\"background-color: #{swatch.value};\"></div> <span class=\"value\">#{swatch.value}</span></li>")
+			@$swatches.find('li').click (event) =>
+				@commitColor $(event.currentTarget).find('.value').html()
+
 
 		setColorAsHsv: (hsv, commitHsv) ->
 			newHsv = @hsv
@@ -182,6 +184,9 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			hsv.s = xOffset / width
 			hsv.v = 1 - yOffset / height
 			@setColorAsHsv(hsv, false)
+			if !@$selection.find('.selector_base').is(":focus")
+				@$selection.find('.selector_base').focus()
+
 
 		handleHueDrag: (event) =>
 			offset = event.clientY - @$hueSlider.offset().top;
@@ -190,6 +195,8 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			hsv = {}
 			hsv.h = (1 - offset / height) * 360;
 			@setColorAsHsv(hsv, false)
+			if !@$hueSlider.find('.selector_base').is(":focus")
+				@$hueSlider.find('.selector_base').focus()
 
 		handleOpacityDrag: (event) =>
 			offset = event.clientY - @$opacitySlider.offset().top
@@ -198,20 +205,90 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			hsv = {}
 			hsv.a = (1 - offset / height)
 			@setColorAsHsv(hsv, false)
-        
+			if !@$opacitySlider.find('.selector_base').is(":focus")
+				@$opacitySlider.find('.selector_base').focus()
+
 		registerDragHandler: (selector, handler) =>
-			@$element.find(selector).on "mousedown.colorpopoverview", (event) =>
+			@$element.find(selector).on "mousedown.coloreditorview", (event) =>
 				handler.call @, event
-				$(window).on("mousemove.colorpopoverview", (event) =>
+				$(window).on("mousemove.coloreditorview", (event) =>
 					handler.call @, event
-				).on "mouseup.colorpopoverview", ->
-					$(window).off "mouseup.colorpopoverview"
-					$(window).off "mousemove.colorpopoverview"
+				).on "mouseup.coloreditorview", ->
+					$(window).off "mouseup.coloreditorview"
+					$(window).off "mousemove.coloreditorview"
 
 
+		handleSelectionFocus: (event) =>
+			switch event.keyCode
+				when 37 #left
+					hsv = {}
+					sat = $.trim(@hsv.s.replace('%', ''))
+					if sat > 0
+						hsv.s = if (sat - 1) <= 0 then 0 else (sat - 1)
+						@setColorAsHsv(hsv)
+					return false
+				when 39 #right
+					hsv = {}
+					sat = $.trim(@hsv.s.replace('%', ''))
+					if sat < 100
+						hsv.s = if (Number(sat) + 1) >= 100 then 100 else (Number(sat) + 1)
+						@setColorAsHsv(hsv)
+					return false
+				when 40 #down
+					hsv = {}
+					value = $.trim(@hsv.v.replace('%', ''))
+					if value > 0
+						hsv.v = if (value - 1) <= 0 then 0 else (value - 1)
+						@setColorAsHsv(hsv)
+					return false
+				when 38 #up
+					hsv = {}
+					value = $.trim(@hsv.v.replace('%', ''))
+					if value < 100
+						hsv.v = if (Number(value) + 1) >= 100 then 100 else (Number(value) + 1)
+						@setColorAsHsv(hsv)
+					return false
 
+		handleHueFocus: (event) =>
+			step = 3.6
+			switch event.keyCode
+				when 40 #down
+					hsv = {}
+					hue = Number(@hsv.h)
+					if hue > 0
+						hsv.h = if (hue - step) <= 0 then 360 - step else (hue - step)
+						@setColorAsHsv(hsv)
+					return false
+				when 38 #up
+					hsv = {}
+					hue = Number(@hsv.h)
+					if hue < 360
+						hsv.h = if (hue + step) >= 360 then step else (hue + step)
+						@setColorAsHsv(hsv)
+					return false
 
+		handleOpacityFocus: (event) =>
+			step = 0.01
+			switch event.keyCode
+				when 40 #down
+					hsv = {}
+					alpha = @hsv.a
+					if alpha > 0
+						hsv.a = if (alpha - step) <= 0 then 0 else (alpha - step)
+						@setColorAsHsv(hsv)
+					return false
+				when 38 #up
+					hsv = {}
+					alpha = @hsv.a
+					if alpha < 100
+						hsv.v = if (alpha + step) >= 1 then 1 else (alpha + step)
+						@setColorAsHsv(hsv)
 
+		registerFocusHandler: (element, handler) =>
+			element.focus (event) ->
+				element.bind 'keydown', handler
+			element.blur (event) ->
+				element.unbind 'keydown', handler
 
 
 

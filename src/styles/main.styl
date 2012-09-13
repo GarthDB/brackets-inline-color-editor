@@ -32,30 +32,22 @@
 			border-radius 0px 3px 3px 0px
 			background-color #cccccc
 
-	// .small_swatches
-	// 	width 135px
-	// 	float left
-
-	// .small_swatch
-	// 	background-image url("../img/color_thumb_back.png")
-	// 	width 15px
-	// 	height 15px
-	// 	margin-bottom 5px
-	// 	margin-right 5px
-	// 	float left
-	// 	border-radius 3px
-	// 	box-shadow 0 1px 0 #fff
-	// 	&:last-child
-	// 		margin-right 0px
-
-	// .color_swatch
-	// 	box-shadow inset 0 1px 0 rgba(0,0,0,.2)
-	// 	background-color #d9dcdc 
-	// 	height 100%
-	// 	width 100%
-	// 	margin-top 0px
-	// 	margin-left 0px
-	// 	border-radius 3px
+	ul.swatches
+		position absolute
+		list-style none
+		top 14px
+		left 265px
+		li
+			cursor pointer
+			height 20px
+			.swatch
+				display inline-block
+				width 15px
+				height 15px
+				border-radius 3px
+				box-shadow 0 -1px 0 rgba(0,0,0,0.2), 0 1px 0 #fff
+				position relative
+				top 3px
 
 	.sliders
 		position relative
@@ -87,6 +79,10 @@
 			position absolute
 			margin-bottom -8px
 			margin-left -5px
+			&:focus
+				outline: none
+				box-shadow 0 0 4px 4px hsla(208, 100%, 50%, 0.8)
+				border-radius 6px
 		.selector
 			width 19px
 			height 19px
@@ -94,7 +90,6 @@
 			left -4px
 			top -4px
 			background-image url("../img/grabber_color-well.png")
-			
 
 	.slider
 		border-radius 3px
@@ -112,6 +107,10 @@
 			background-color transparent
 			position absolute
 			margin -1px -6px -4px -1px
+			&:focus
+				outline: none
+				box-shadow 0 0 4px 4px hsla(208, 100%, 50%, 0.8)
+				border-radius 3px
 		.selector
 			width 20px
 			height 12px

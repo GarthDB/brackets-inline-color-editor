@@ -7,22 +7,22 @@
 		.color_selection_field
 			.saturation_gradient.gradient_overlay
 			.luminosity_gradient.gradient_overlay
-			.selector_base
+			.selector_base(tabindex="0")
 				.selector
 		.hue_slider.slider
-			.selector_base
+			.selector_base(tabindex="0")
 				.selector
 		.opacity_slider.slider
 			.opacity_gradient.gradient_overlay
-			.selector_base
+			.selector_base(tabindex="0")
 				.selector
-	.swatches
+	ul.swatches
 	footer
 		input.color_value
 		ul.button-bar
 			li.selected
-				a.rgba(href="#") RGBa
+				a.rgba(href="#", tabindex="0") RGBa
 			li
-				a.hex(href="#") HEX
+				a.hex(href="#", tabindex="0") HEX
 			li
-				a.hsla(href="#") HSLa
+				a.hsla(href="#", tabindex="0") HSLa

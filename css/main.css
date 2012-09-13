@@ -33,6 +33,25 @@ floatleft
   border-radius: 0px 3px 3px 0px;
   background-color: #ccc;
 }
+.color_editor ul.swatches {
+  position: absolute;
+  list-style: none;
+  top: 14px;
+  left: 265px;
+}
+.color_editor ul.swatches li {
+  cursor: pointer;
+  height: 20px;
+}
+.color_editor ul.swatches li .swatch {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.2), 0 1px 0 #fff;
+  position: relative;
+  top: 3px;
+}
 .color_editor .sliders {
   position: relative;
   clear: both;
@@ -67,6 +86,11 @@ floatleft
   margin-bottom: -8px;
   margin-left: -5px;
 }
+.color_editor .color_selection_field .selector_base:focus {
+  outline: none;
+  box-shadow: 0 0 4px 4px rgba(0,136,255,0.8);
+  border-radius: 6px;
+}
 .color_editor .color_selection_field .selector {
   width: 19px;
   height: 19px;
@@ -92,6 +116,11 @@ floatleft
   background-color: transparent;
   position: absolute;
   margin: -1px -6px -4px -1px;
+}
+.color_editor .slider .selector_base:focus {
+  outline: none;
+  box-shadow: 0 0 4px 4px rgba(0,136,255,0.8);
+  border-radius: 3px;
 }
 .color_editor .slider .selector {
   width: 20px;

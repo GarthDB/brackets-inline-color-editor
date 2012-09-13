@@ -16,6 +16,14 @@
         this.element = element;
         this.callback = callback != null ? callback : null;
         this.swatches = swatches != null ? swatches : null;
+        this.registerFocusHandler = __bind(this.registerFocusHandler, this);
+
+        this.handleOpacityFocus = __bind(this.handleOpacityFocus, this);
+
+        this.handleHueFocus = __bind(this.handleHueFocus, this);
+
+        this.handleSelectionFocus = __bind(this.handleSelectionFocus, this);
+
         this.registerDragHandler = __bind(this.registerDragHandler, this);
 
         this.handleOpacityDrag = __bind(this.handleOpacityDrag, this);
@@ -48,10 +56,6 @@
         this.commitColor(color);
       }
 
-      ColorEditor.prototype.addSwatches = function() {
-        return console.log(this.$swatches);
-      };
-
       ColorEditor.prototype.addFieldListeners = function() {
         this.bindColorFormatToRadioButton('rgba');
         this.bindColorFormatToRadioButton('hex');
@@ -61,7 +65,10 @@
         this.bindColorSwatches();
         this.registerDragHandler('.color_selection_field', this.handleSelectionFieldDrag);
         this.registerDragHandler('.hue_slider', this.handleHueDrag);
-        return this.registerDragHandler('.opacity_slider', this.handleOpacityDrag);
+        this.registerDragHandler('.opacity_slider', this.handleOpacityDrag);
+        this.registerFocusHandler(this.$selection.find('.selector_base'), this.handleSelectionFocus);
+        this.registerFocusHandler(this.$hueSlider.find('.selector_base'), this.handleHueFocus);
+        return this.registerFocusHandler(this.$opacitySlider.find('.selector_base'), this.handleOpacityFocus);
       };
 
       ColorEditor.prototype.synchronize = function() {
@@ -127,7 +134,6 @@
         handler = function(event) {
           var colorObject, newColor, newFormat;
           newFormat = $(event.currentTarget).html().toLowerCase();
-          console.log(newFormat);
           newColor = _this.getColor();
           colorObject = tinycolor(newColor);
           switch (newFormat) {
@@ -171,14 +177,16 @@
       };
 
       ColorEditor.prototype.addSwatches = function() {
-        var index, value, _i, _len, _ref, _results;
+        var index, swatch, _i, _len, _ref,
+          _this = this;
         _ref = this.swatches;
-        _results = [];
         for (index = _i = 0, _len = _ref.length; _i < _len; index = ++_i) {
-          value = _ref[index];
-          _results.push(self.$el.find('#swatch_' + index).children('.color_swatch').css('background-color', value));
+          swatch = _ref[index];
+          this.$swatches.append("<li><div class=\"swatch\" style=\"background-color: " + swatch.value + ";\"></div> <span class=\"value\">" + swatch.value + "</span></li>");
         }
-        return _results;
+        return this.$swatches.find('li').click(function(event) {
+          return _this.commitColor($(event.currentTarget).find('.value').html());
+        });
       };
 
       ColorEditor.prototype.setColorAsHsv = function(hsv, commitHsv) {
@@ -234,7 +242,10 @@
         hsv = {};
         hsv.s = xOffset / width;
         hsv.v = 1 - yOffset / height;
-        return this.setColorAsHsv(hsv, false);
+        this.setColorAsHsv(hsv, false);
+        if (!this.$selection.find('.selector_base').is(":focus")) {
+          return this.$selection.find('.selector_base').focus();
+        }
       };
 
       ColorEditor.prototype.handleHueDrag = function(event) {
@@ -244,7 +255,10 @@
         offset = Math.min(height, Math.max(0, offset));
         hsv = {};
         hsv.h = (1 - offset / height) * 360;
-        return this.setColorAsHsv(hsv, false);
+        this.setColorAsHsv(hsv, false);
+        if (!this.$hueSlider.find('.selector_base').is(":focus")) {
+          return this.$hueSlider.find('.selector_base').focus();
+        }
       };
 
       ColorEditor.prototype.handleOpacityDrag = function(event) {
@@ -254,19 +268,114 @@
         offset = Math.min(height, Math.max(0, offset));
         hsv = {};
         hsv.a = 1 - offset / height;
-        return this.setColorAsHsv(hsv, false);
+        this.setColorAsHsv(hsv, false);
+        if (!this.$opacitySlider.find('.selector_base').is(":focus")) {
+          return this.$opacitySlider.find('.selector_base').focus();
+        }
       };
 
       ColorEditor.prototype.registerDragHandler = function(selector, handler) {
         var _this = this;
-        return this.$element.find(selector).on("mousedown.colorpopoverview", function(event) {
+        return this.$element.find(selector).on("mousedown.coloreditorview", function(event) {
           handler.call(_this, event);
-          return $(window).on("mousemove.colorpopoverview", function(event) {
+          return $(window).on("mousemove.coloreditorview", function(event) {
             return handler.call(_this, event);
-          }).on("mouseup.colorpopoverview", function() {
-            $(window).off("mouseup.colorpopoverview");
-            return $(window).off("mousemove.colorpopoverview");
+          }).on("mouseup.coloreditorview", function() {
+            $(window).off("mouseup.coloreditorview");
+            return $(window).off("mousemove.coloreditorview");
           });
+        });
+      };
+
+      ColorEditor.prototype.handleSelectionFocus = function(event) {
+        var hsv, sat, value;
+        switch (event.keyCode) {
+          case 37:
+            hsv = {};
+            sat = $.trim(this.hsv.s.replace('%', ''));
+            if (sat > 0) {
+              hsv.s = (sat - 1) <= 0 ? 0 : sat - 1;
+              this.setColorAsHsv(hsv);
+            }
+            return false;
+          case 39:
+            hsv = {};
+            sat = $.trim(this.hsv.s.replace('%', ''));
+            if (sat < 100) {
+              hsv.s = (Number(sat) + 1) >= 100 ? 100 : Number(sat) + 1;
+              this.setColorAsHsv(hsv);
+            }
+            return false;
+          case 40:
+            hsv = {};
+            value = $.trim(this.hsv.v.replace('%', ''));
+            if (value > 0) {
+              hsv.v = (value - 1) <= 0 ? 0 : value - 1;
+              this.setColorAsHsv(hsv);
+            }
+            return false;
+          case 38:
+            hsv = {};
+            value = $.trim(this.hsv.v.replace('%', ''));
+            if (value < 100) {
+              hsv.v = (Number(value) + 1) >= 100 ? 100 : Number(value) + 1;
+              this.setColorAsHsv(hsv);
+            }
+            return false;
+        }
+      };
+
+      ColorEditor.prototype.handleHueFocus = function(event) {
+        var hsv, hue, step;
+        step = 3.6;
+        switch (event.keyCode) {
+          case 40:
+            hsv = {};
+            hue = Number(this.hsv.h);
+            if (hue > 0) {
+              hsv.h = (hue - step) <= 0 ? 360 - step : hue - step;
+              this.setColorAsHsv(hsv);
+            }
+            return false;
+          case 38:
+            hsv = {};
+            hue = Number(this.hsv.h);
+            if (hue < 360) {
+              hsv.h = (hue + step) >= 360 ? step : hue + step;
+              this.setColorAsHsv(hsv);
+            }
+            return false;
+        }
+      };
+
+      ColorEditor.prototype.handleOpacityFocus = function(event) {
+        var alpha, hsv, step;
+        step = 0.01;
+        switch (event.keyCode) {
+          case 40:
+            hsv = {};
+            alpha = this.hsv.a;
+            if (alpha > 0) {
+              hsv.a = (alpha - step) <= 0 ? 0 : alpha - step;
+              this.setColorAsHsv(hsv);
+            }
+            return false;
+          case 38:
+            hsv = {};
+            alpha = this.hsv.a;
+            if (alpha < 100) {
+              hsv.v = (alpha + step) >= 1 ? 1 : alpha + step;
+              return this.setColorAsHsv(hsv);
+            }
+        }
+      };
+
+      ColorEditor.prototype.registerFocusHandler = function(element, handler) {
+        element.focus(function(event) {
+          return element.bind('keydown', handler);
+        });
+        return element.blur(function(event) {
+          return element.unbind('keydown', handler);
         });
       };
 

@@ -193,10 +193,10 @@
   top: 2px;
 }
 @media all and (-webkit-min-device-pixel-ratio : 2), (min-device-pixel-ratio : 2) {
-  .color_editor .large_swatches {
+  .color_editor header .large_swatches {
     background-image: url("../img/color_thumb_back@2x.png");
   }
-  .color_editor .small_swatch {
+  .color_editor ul.swatches li .swatch_bg {
     background-image: url("../img/color_thumb_back@2x.png");
   }
   .color_editor .color_selection_field .selector {

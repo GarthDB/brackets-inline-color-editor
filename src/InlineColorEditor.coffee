@@ -59,6 +59,7 @@ define (require, exports, module) ->
 		
 		onAdded: () ->
 			window.setTimeout(@._sizeEditorToContent.bind(@));
+			console.log @colorEditor.focus()
 		
 		_sizeEditorToContent: () ->
 			@hostEditor.setInlineWidgetHeight(@, @$wrapperDiv.outerHeight(), true)

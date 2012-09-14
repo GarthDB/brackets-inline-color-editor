@@ -30,6 +30,8 @@
 
         this.handleHueDrag = __bind(this.handleHueDrag, this);
 
+        this.handleSelectionFieldDrag = __bind(this.handleSelectionFieldDrag, this);
+
         this.color = tinycolor(color);
         this.lastColor = color;
         this.$element = $(this.element);
@@ -283,15 +285,15 @@
       };
 
       ColorEditor.prototype.registerDragHandler = function(selector, handler) {
-        var _this = this;
-        return this.$element.find(selector).on("mousedown.coloreditorview", function(event) {
-          handler.call(_this, event);
-          return $(window).on("mousemove.coloreditorview", function(event) {
-            return handler.call(_this, event);
-          }).on("mouseup.coloreditorview", function() {
-            $(window).off("mouseup.coloreditorview");
-            return $(window).off("mousemove.coloreditorview");
-          });
+        var element, mouseupHandler;
+        element = this.$element.find(selector);
+        mouseupHandler = function(event) {
+          $(window).unbind('mousemove', handler);
+          return $(window).unbind('mouseup', mouseupHandler);
+        };
+        return element.mousedown(function(event) {
+          $(window).bind('mousemove', handler);
+          return $(window).bind('mouseup', mouseupHandler);
         });
       };
 

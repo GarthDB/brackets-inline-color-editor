@@ -180,7 +180,7 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@synchronize()
 
 
-		handleSelectionFieldDrag: (event) ->
+		handleSelectionFieldDrag: (event) =>
 			yOffset = event.clientY - @$selection.offset().top
 			xOffset = event.clientX - @$selection.offset().left
 			height = @$selection.height()
@@ -216,13 +216,14 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 				@$opacitySlider.find('.selector_base').focus()
 
 		registerDragHandler: (selector, handler) =>
-			@$element.find(selector).on "mousedown.coloreditorview", (event) =>
-				handler.call @, event
-				$(window).on("mousemove.coloreditorview", (event) =>
-					handler.call @, event
-				).on "mouseup.coloreditorview", ->
-					$(window).off "mouseup.coloreditorview"
-					$(window).off "mousemove.coloreditorview"
+			element = @$element.find(selector)
+			mouseupHandler = (event) ->
+				$(window).unbind 'mousemove', handler
+				$(window).unbind 'mouseup', mouseupHandler
+
+			element.mousedown (event) ->
+				$(window).bind 'mousemove', handler
+				$(window).bind 'mouseup', mouseupHandler
 
 
 		handleSelectionFocus: (event) =>
@@ -265,7 +266,6 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 					return false
 
 		handleHueFocus: (event) =>
-			
 			switch event.keyCode
 				when 40 #down
 					step = 3.6

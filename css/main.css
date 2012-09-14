@@ -188,10 +188,6 @@
   border: 1px solid #1b1d1d;
   z-index: 911;
 }
-.color_editor footer .button-bar {
-  position: relative;
-  top: 2px;
-}
 @media all and (-webkit-min-device-pixel-ratio : 2), (min-device-pixel-ratio : 2) {
   .color_editor header .large_swatches {
     background-image: url("../img/color_thumb_back@2x.png");

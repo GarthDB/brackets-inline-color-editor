@@ -1,6 +1,8 @@
 .color_editor {
+  -webkit-text-size-adjust: none;
+  font-size: 13px;
   width: 232px;
-  padding: 16px;
+  padding: 16px 16px 16px 38px;
 }
 .color_editor header {
   width: 100%;
@@ -40,9 +42,10 @@
   position: absolute;
   list-style: none;
   top: 14px;
-  left: 265px;
+  left: 287px;
 }
 .color_editor ul.swatches li {
+  -webkit-text-size-adjust: none;
   cursor: pointer;
   height: 20px;
 }

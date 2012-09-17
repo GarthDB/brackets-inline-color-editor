@@ -1,28 +1,30 @@
 .color_editor
-	header
-		.large_swatches
-			.current_color.large_swatch
-			.last_color.large_swatch
-	.sliders
-		.color_selection_field
-			.saturation_gradient.gradient_overlay
-			.luminosity_gradient.gradient_overlay
-			.selector_base(tabindex="0")
-				.selector
-		.hue_slider.slider
-			.selector_base(tabindex="0")
-				.selector
-		.opacity_slider.slider
-			.opacity_gradient.gradient_overlay
-			.selector_base(tabindex="0")
-				.selector
-	ul.swatches
-	footer
-		input.color_value
-		ul.button-bar
-			li.selected
-				a.rgba(href="#", tabindex="0") RGBa
-			li
-				a.hex(href="#", tabindex="0") HEX
-			li
-				a.hsla(href="#", tabindex="0") HSLa
+	section
+		.sliders
+			.color_selection_field
+				.saturation_gradient.gradient_overlay
+				.luminosity_gradient.gradient_overlay
+				.selector_base(tabindex="0")
+					.selector
+			.hue_slider.slider
+				.selector_base(tabindex="0")
+					.selector
+			.opacity_slider.slider
+				.opacity_gradient.gradient_overlay
+				.selector_base(tabindex="0")
+					.selector
+		footer
+			input.color_value
+			ul.button-bar
+				li.selected
+					a.rgba(href="#", tabindex="0") RGBa
+				li
+					a.hex(href="#", tabindex="0") HEX
+				li
+					a.hsla(href="#", tabindex="0") HSLa
+	aside
+		header
+			.large_swatches
+				.current_color.large_swatch
+				.last_color.large_swatch
+		ul.swatches

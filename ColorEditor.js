@@ -100,6 +100,7 @@
       };
 
       ColorEditor.prototype.focus = function() {
+        console.log('um, focused?');
         if (!this.$selection.find('.selector_base').is(":focus")) {
           this.$selection.find('.selector_base').focus();
           return true;

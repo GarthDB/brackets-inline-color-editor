@@ -75,6 +75,7 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@$selectionBase.css({left: @hsv.s, bottom: @hsv.v})
 
 		focus: ->
+			console.log 'um, focused?'
 			if !@$selection.find('.selector_base').is(":focus")
 				@$selection.find('.selector_base').focus()
 				return true

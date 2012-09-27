@@ -217,7 +217,7 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 
 		registerDragHandler: (selector, handler) =>
 			element = @$element.find(selector)
-			element.click handler
+			element.mousedown handler
 			mouseupHandler = (event) ->
 				$(window).unbind 'mousemove', handler
 				$(window).unbind 'mouseup', mouseupHandler

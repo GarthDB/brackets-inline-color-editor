@@ -287,7 +287,7 @@
       ColorEditor.prototype.registerDragHandler = function(selector, handler) {
         var element, mouseupHandler;
         element = this.$element.find(selector);
-        element.click(handler);
+        element.mousedown(handler);
         mouseupHandler = function(event) {
           $(window).unbind('mousemove', handler);
           return $(window).unbind('mouseup', mouseupHandler);

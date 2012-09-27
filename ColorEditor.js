@@ -100,7 +100,6 @@
       };
 
       ColorEditor.prototype.focus = function() {
-        console.log('um, focused?');
         if (!this.$selection.find('.selector_base').is(":focus")) {
           this.$selection.find('.selector_base').focus();
           return true;
@@ -288,6 +287,7 @@
       ColorEditor.prototype.registerDragHandler = function(selector, handler) {
         var element, mouseupHandler;
         element = this.$element.find(selector);
+        element.click(handler);
         mouseupHandler = function(event) {
           $(window).unbind('mousemove', handler);
           return $(window).unbind('mouseup', mouseupHandler);

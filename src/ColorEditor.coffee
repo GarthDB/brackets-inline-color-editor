@@ -75,7 +75,6 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 			@$selectionBase.css({left: @hsv.s, bottom: @hsv.v})
 
 		focus: ->
-			console.log 'um, focused?'
 			if !@$selection.find('.selector_base').is(":focus")
 				@$selection.find('.selector_base').focus()
 				return true
@@ -218,6 +217,7 @@ define ['helper/tinycolor-min'], (tinycolorMin) ->
 
 		registerDragHandler: (selector, handler) =>
 			element = @$element.find(selector)
+			element.click handler
 			mouseupHandler = (event) ->
 				$(window).unbind 'mousemove', handler
 				$(window).unbind 'mouseup', mouseupHandler
